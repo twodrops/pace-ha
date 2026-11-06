@@ -35,6 +35,8 @@ Switch between backends at any time from the integration's options - **every sen
 ### HACS (recommended)
 Add this repository as a custom repository in HACS, then install "PACE".
 
+> **Note**: starting with Home Assistant 2026.11, HACS ships built into Home Assistant itself as the **Marketplace** (under **Settings → Marketplace**, no separate download needed). If you're on 2026.11+, add this repository as a custom repository there instead — the process is otherwise the same. See the [HACS Marketplace docs](https://hacs.xyz/docs/marketplace/) for details.
+
 ### Manual
 Copy `custom_components/pace/` into your Home Assistant `config/custom_components/` directory and restart.
 
