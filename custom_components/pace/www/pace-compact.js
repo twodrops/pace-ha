@@ -2,11 +2,11 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.0.5
+ * Version: 1.0.7
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
- * - Sections: 3 columns wide, auto height grid by default
+ * - Sections: 12 columns wide, auto height grid by default
  * - Both layouts fully supported with proper height handling
  * - Mobile-first, minimalist design
  */
@@ -100,11 +100,11 @@ class PaceCompact extends HTMLElement {
   }
 
   static getGridOptions() {
-    return { columns: 3, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   getGridOptions() {
-    return { columns: 3, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   updateCard() {
@@ -567,4 +567,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.0.5 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.0.7 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

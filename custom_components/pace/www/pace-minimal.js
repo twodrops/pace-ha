@@ -2,11 +2,11 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.0.5
+ * Version: 1.0.7
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
- * - Sections: 4 columns wide, auto height grid by default
+ * - Sections: 12 columns wide, auto height grid by default
  * - Both layouts fully supported with proper height handling
  */
 
@@ -102,11 +102,11 @@ class PaceMinimal extends HTMLElement {
   }
 
   static getGridOptions() {
-    return { columns: 4, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   getGridOptions() {
-    return { columns: 4, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   updateCard() {
@@ -145,7 +145,7 @@ class PaceMinimal extends HTMLElement {
     const btn = this.shadowRoot.querySelector('.test-btn');
     if (btn) {
       btn.classList.toggle('running', isRunning);
-      btn.textContent = isRunning ? 'Testing...' : 'Run Speed Test';
+      btn.textContent = isRunning ? 'Testing...' : 'Run Test';
     }
 
     const netState = this._getRawState(this._resolve('internet_connected', e.internet_connected, 'binary_sensor'));
@@ -424,7 +424,7 @@ class PaceMinimal extends HTMLElement {
 
         <div class="ip-text" hidden></div>
 
-        <button class="test-btn">Run Speed Test</button>
+        <button class="test-btn">Run Test</button>
       </div>
     `;
 
@@ -574,4 +574,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.0.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.0.7 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

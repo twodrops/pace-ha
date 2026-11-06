@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.0.5
+ * Version: 1.0.6
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -370,7 +370,7 @@ class PaceDashboard extends HTMLElement {
     const runBtn = this.shadowRoot.querySelector('#run');
     if (runBtn) {
       runBtn.classList.toggle('running', isRunning);
-      runBtn.textContent = isRunning ? '■ Testing...' : '▶ Run Test';
+      runBtn.textContent = isRunning ? 'Testing...' : 'Run Test';
     }
 
     if (this._config.show_charts) {
@@ -1033,7 +1033,7 @@ class PaceDashboard extends HTMLElement {
             background: transparent;
             color: var(--pace-accent-color, var(--ls-accent, #2563eb));
             font-family: ${TERMINAL_FONT_MONO};
-            font-size: 12px; font-weight: 600; letter-spacing: 0.4px; cursor: pointer; transition: background-color 0.15s ease, color 0.15s ease;
+            font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer; transition: background-color 0.15s ease, color 0.15s ease;
             min-height: 32px;
             min-width: 80px;
             touch-action: manipulation;
@@ -1263,7 +1263,7 @@ class PaceDashboard extends HTMLElement {
 
         <div class="footer">
           <span class="last-test">Never tested</span>
-          <button class="run-btn" id="run">▶ Run Test</button>
+          <button class="run-btn" id="run">Run Test</button>
         </div>
       </div>
     `;
@@ -1530,4 +1530,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.0.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.0.6 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
