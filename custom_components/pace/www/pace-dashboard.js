@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.0.2
+ * Version: 1.0.5
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.2';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.4';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -370,6 +370,7 @@ class PaceDashboard extends HTMLElement {
     const runBtn = this.shadowRoot.querySelector('#run');
     if (runBtn) {
       runBtn.classList.toggle('running', isRunning);
+      runBtn.textContent = isRunning ? '■ Testing...' : '▶ Run Test';
     }
 
     if (this._config.show_charts) {
@@ -442,7 +443,7 @@ class PaceDashboard extends HTMLElement {
   }
 
   // Lifetime download/upload totals (if configured) shown in the traffic
-  // chart's footer, standing in for FRITZ!Portal's TRAFFIC.LIVE month total.
+  // chart's footer
   _trafficFooterLeft() {
     const e = this._config.entities;
     const dl = this._getState(this._resolve('lifetime_download', e.lifetime_download));
@@ -452,8 +453,7 @@ class PaceDashboard extends HTMLElement {
   }
 
   // Builds a smooth (Catmull-Rom) SVG path through a set of points, giving
-  // charts the same gently-curved look as FRITZ!Portal's TRAFFIC.LIVE graph
-  // instead of a straight-segment polyline.
+  // charts a gently-curved look instead of a straight-segment polyline.
   _smoothPath(points) {
     let d = `M${points[0][0]},${points[0][1]}`;
     for (let i = 0; i < points.length - 1; i++) {
@@ -477,9 +477,8 @@ class PaceDashboard extends HTMLElement {
     }).join('');
   }
 
-  // Fixed look-and-feel for every chart (not user-configurable), matching
-  // FRITZ!Portal's documented TRAFFIC.LIVE recharts spec: 1.6px strokes,
-  // gradient fills 18% -> 0%, dashed grid lines (see _gridLinesSvg).
+  // Fixed look-and-feel for every chart (not user-configurable): 1.6px
+  // strokes, gradient fills 18% -> 0%, dashed grid lines (see _gridLinesSvg).
   _renderSeriesShapes(type, points, width, height, gradientId) {
     const path = this._smoothPath(points);
     const color = this._chartColor(type);
@@ -546,9 +545,9 @@ class PaceDashboard extends HTMLElement {
     return value < 10 ? value.toFixed(1) : Math.round(value).toString();
   }
 
-  // Renders one of the big FRITZ!Portal TRAFFIC.LIVE-style chart cards:
-  // shared 0..niceMax y-axis across all series, start/end x-axis time
-  // labels, a live legend, and (via _attachChartHover) a value tooltip.
+  // Renders one of the big live traffic/latency chart cards: shared
+  // 0..niceMax y-axis across all series, start/end x-axis time labels,
+  // a live legend, and (via _attachChartHover) a value tooltip.
   _drawLiveChart(chartKey, series, footerLeft) {
     const root = this.shadowRoot.querySelector(`.chart-card-${chartKey}`);
     if (!root) return;
@@ -602,10 +601,8 @@ class PaceDashboard extends HTMLElement {
   }
 
   // Shared pointer/touch hover handler wired once per chart in render():
-  // shows a crosshair + tooltip with each series' nearest value and time.
-  // Shared pointer/touch hover handler wired once per chart in render():
-  // shows a crosshair + tooltip, and (matching FRITZ!Portal) a small white
-  // dot marking each series' exact point on the line under the cursor.
+  // shows a crosshair + tooltip, and a small white dot marking each
+  // series' exact point on the line under the cursor.
   _attachChartHover(plotEl, series) {
     const tooltip = plotEl.querySelector('.chart-tooltip');
     const crosshair = plotEl.querySelector('.chart-crosshair');
@@ -733,7 +730,7 @@ class PaceDashboard extends HTMLElement {
 
       const e = this._config.entities;
       const labels = this._config.labels || { download: 'Download', upload: 'Upload', ping: 'Ping', jitter: 'Jitter' };
-      // Literal corner-bracket glyphs (fritz-portal-card.js's .tile technique).
+      // Literal corner-bracket glyphs.
       const cornerGlyphs = '<span class="tk tl">┌</span><span class="tk tr">┐</span><span class="tk bl">└</span><span class="tk br">┘</span>';
 
       this.shadowRoot.innerHTML = `
@@ -751,8 +748,7 @@ class PaceDashboard extends HTMLElement {
           }
 
           /* "Terminal Style" (terminal_style: false): fall back to HA's own
-             fonts, card chrome, and typography instead of the terminal/
-             FRITZ!Portal look (mirrors fritz-portal-card.js's :host([ha])). */
+             fonts, card chrome, and typography instead of the terminal look. */
           :host([ha]) .card,
           :host([ha]) .server-name,
           :host([ha]) .run-btn {
@@ -813,7 +809,7 @@ class PaceDashboard extends HTMLElement {
           .server-name { font-size: 11px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #94a3b8); letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; min-width: 0; }
           .server-name::before { content: attr(data-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .net-status { text-align: right; flex-shrink: 0; }
-          .net-state { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); }
+          .net-state { display: inline-block; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); }
           .net-state.online { color: var(--ls-success, #4ad19a); }
           .net-ip { font-size: 10px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #64748b); margin-top: 2px; }
 
@@ -824,8 +820,8 @@ class PaceDashboard extends HTMLElement {
             margin-bottom: 10px;
             flex-shrink: 0;
           }
-          /* FRITZ!Portal-style stat card: label, big value + unit, optional
-             muted subtitle, optional trend sparkline or capacity bar. */
+          /* Stat card: label, big value + unit, optional muted subtitle,
+             optional trend sparkline or capacity bar. */
           .metric {
             position: relative;
             background: var(--ls-panel, var(--secondary-background-color, #10141b));
@@ -842,11 +838,10 @@ class PaceDashboard extends HTMLElement {
           }
           .metric:hover { background: var(--ls-panel, #171d27); filter: brightness(1.15); }
           .metric:active { background: var(--ls-panel, #171d27); filter: brightness(1.3); }
-          /* FRITZ!Portal corner-bracket frame: literal Unicode box-drawing
-             glyphs sitting right on the border corners (not CSS-drawn
-             rectangles), exactly as fritz-portal-card.js's .tile does it.
-             Only on the 4 stat cards that actually carry a sparkline,
-             colored to match that card's own graph line. */
+          /* Corner-bracket frame: literal Unicode box-drawing glyphs sitting
+             right on the border corners (not CSS-drawn rectangles). Only on
+             the 4 stat cards that actually carry a sparkline, colored to
+             match that card's own graph line. */
           .metric-dl { --metric-accent: var(--pace-accent-color, var(--ls-accent, #2563eb)); }
           .metric-ul { --metric-accent: var(--ls-upload, #7c3aed); }
           .metric-ping { --metric-accent: var(--ls-ping, #d97706); }
@@ -960,9 +955,9 @@ class PaceDashboard extends HTMLElement {
             font-weight: 500;
           }
 
-          /* FRITZ!Portal TRAFFIC.LIVE-style live chart cards (traffic +
-             latency): title/legend header, y-axis labels beside the plot,
-             x-axis start/end time, and a hover tooltip + crosshair. */
+          /* Live chart cards (traffic + latency): title/legend header,
+             y-axis labels beside the plot, x-axis start/end time, and a
+             hover tooltip + crosshair. */
           .chart-card {
             position: relative;
             background: var(--ls-panel, var(--secondary-background-color, #10141b));
@@ -984,8 +979,8 @@ class PaceDashboard extends HTMLElement {
           .chart-plot { position: relative; flex: 1; min-width: 0; touch-action: pan-y; }
           .chart-plot svg { width: 100%; height: 110px; display: block; overflow: visible; }
           .chart-crosshair { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--divider-color, #3a4554); pointer-events: none; transition: left 0.12s cubic-bezier(0.34, 1.56, 0.64, 1); }
-          /* FRITZ!Portal-style hover marker: a small white dot on each
-             series' line, sitting right on the crosshair. */
+          /* Hover marker: a small white dot on each series' line, sitting
+             right on the crosshair. */
           .chart-dot {
             position: absolute;
             top: 0;
@@ -1535,4 +1530,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.0.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.0.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

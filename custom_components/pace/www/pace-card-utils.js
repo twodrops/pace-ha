@@ -32,11 +32,9 @@ const TERMINAL_PALETTE = {
 
 /**
  * Semantic colors that fall back to Home Assistant's own theme variables
- * when a card's `terminal_style` option is set to false (mirrors
- * fritz-portal-card.js's `:host([ha])` remapping of
- * --fp-accent/--fp-ok/--fp-warn/--fp-bad). Series-identity colors (upload/
- * ping/jitter) stay as our own fixed hues even in HA style mode, same as
- * FRITZ!Portal leaves its wlan/lan colors untouched.
+ * when a card's `terminal_style` option is set to false. 
+ * Series-identity colors (upload/
+ * ping/jitter) stay as our own fixed hues even in HA style mode
  */
 const HA_STYLE_COLOR_MAP = {
   accent: 'var(--primary-color)',
@@ -74,8 +72,8 @@ export function getTerminalColor(hass, key, fallback, config) {
 
 /**
  * Toggles the `ha` host attribute that activates each card's :host([ha])
- * CSS block. `terminal_style` defaults to true (the deliberate terminal/
- * FRITZ!Portal look); set it to false to opt into looking like a native HA
+ * CSS block. `terminal_style` defaults to true; set it to false to opt into 
+ * looking like a native HA
  * card instead - there is no per-field appearance fine-tuning, just this
  * one binary choice.
  */
@@ -92,8 +90,7 @@ export function applyHaStyleAttribute(hostElement, config) {
  * on literally ANY entity's state change system-wide, not just the ones a
  * given card displays, so without this a busy install can redraw a card's
  * DOM (chart SVGs, bar widths, etc.) many times a second for no reason.
- * This mirrors the same guard FRITZ!Portal's card uses.
- */
+  */
 export function anyStateChanged(prevHass, nextHass, entityIds) {
   if (!prevHass) return true;
   return entityIds.some(id => id && prevHass.states[id] !== nextHass.states[id]);
@@ -114,7 +111,12 @@ export function anyStateChanged(prevHass, nextHass, entityIds) {
 export function beginScrollAnchor() {
   const scroller = document.scrollingElement;
   if (!scroller) return () => {};
-  const wasAtBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+  // Require actual overflow, otherwise a page that merely fits the
+  // viewport (e.g. mid-initial-render, before cards below have expanded)
+  // reads as "at bottom" too, and later growth then yanks the page down
+  // from the top on load instead of leaving it alone.
+  const hasOverflow = scroller.scrollHeight > scroller.clientHeight + 2;
+  const wasAtBottom = hasOverflow && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
   const prevScrollHeight = scroller.scrollHeight;
   return () => {
     if (!wasAtBottom) return;

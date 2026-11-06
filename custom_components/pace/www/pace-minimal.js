@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.0.2
+ * Version: 1.0.5
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.2';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.4';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -144,6 +144,7 @@ class PaceMinimal extends HTMLElement {
     const isRunning = runningState === 'on' || this._pendingClick;
     const btn = this.shadowRoot.querySelector('.test-btn');
     if (btn) {
+      btn.classList.toggle('running', isRunning);
       btn.textContent = isRunning ? 'Testing...' : 'Run Speed Test';
     }
 
@@ -387,6 +388,13 @@ class PaceMinimal extends HTMLElement {
         .test-btn:active {
           filter: brightness(0.9);
         }
+        .test-btn.running {
+          background: var(--ls-success, #16a34a);
+          border-color: var(--ls-success, #16a34a);
+          color: #fff;
+          animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
       </style>
 
       <div class="card">
@@ -566,4 +574,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.0.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.0.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
