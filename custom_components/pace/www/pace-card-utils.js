@@ -148,7 +148,10 @@ export function resolvePaceEntity(hass, configuredId, suffix, fallbackDomain) {
   if (!rawDomain) return configuredId;
 
   const domain = rawDomain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^${domain}\\.pace(?:_[a-z0-9]+)*_${suffix}$`);
+  // The optional leading (?:[a-z0-9]+_)? segment tolerates an area name HA
+  // may prepend to the object_id (e.g. "buro_pace_automatic_download_speed"
+  // when the device/entity is assigned to an area called "Büro").
+  const pattern = new RegExp(`^${domain}\\.(?:[a-z0-9]+_)?pace(?:_[a-z0-9]+)*_${suffix}$`);
   const found = Object.keys(hass.states).find((id) => pattern.test(id));
   return found || configuredId;
 }
