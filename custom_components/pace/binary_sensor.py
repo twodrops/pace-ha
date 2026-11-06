@@ -159,3 +159,10 @@ class PaceInternetConnectedSensor(PaceBaseEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return True if the last connectivity check reached the internet."""
         return self.coordinator.internet_connected
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Expose the rolling connectivity-check history for the Lovelace
+        cards' heartbeat-strip trend display (oldest first, newest last).
+        """
+        return {"recent_checks": list(self.coordinator.connectivity_history)}

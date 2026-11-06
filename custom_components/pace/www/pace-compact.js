@@ -2,7 +2,7 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.0.7
+ * Version: 1.0.8
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -11,7 +11,7 @@
  * - Mobile-first, minimalist design
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.4';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.8';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -139,8 +139,16 @@ class PaceCompact extends HTMLElement {
     const netState = this._getRawState(netEntityId);
     const netDot = this.shadowRoot.querySelector('.net-dot');
     if (netDot) {
-      netDot.classList.toggle('online', netState === 'on');
-      netDot.title = netState === 'on' ? 'Internet: Connected' : netState === 'off' ? 'Internet: Disconnected' : 'Internet: Unknown';
+      // Recent failures while currently online read as "degraded" (amber,
+      // pulsing) instead of the binary healthy/down the dot used to show -
+      // see recent_checks on the internet_connected binary_sensor.
+      const recentChecks = this._hass.states[netEntityId]?.attributes?.recent_checks || [];
+      const isOnline = netState === 'on';
+      const isDegraded = isOnline && recentChecks.slice(-5).some((ok) => ok === false);
+      netDot.classList.toggle('online', isOnline && !isDegraded);
+      netDot.classList.toggle('degraded', isDegraded);
+      const statusText = netState === 'on' ? (isDegraded ? 'Internet: Connected (recent instability)' : 'Internet: Connected') : netState === 'off' ? 'Internet: Disconnected' : 'Internet: Unknown';
+      netDot.title = statusText;
     }
 
     restoreScroll();
@@ -394,6 +402,11 @@ class PaceCompact extends HTMLElement {
           background: var(--ls-success, #2f9d6b);
         }
 
+        .net-dot.degraded {
+          background: var(--ls-warning, #c97b1a);
+          animation: pulse-glow 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
         /* Container query responsive adjustments - simplified to prevent wrapping */
         @container (max-width: 320px) {
           .stat-icon { display: none; }
@@ -567,4 +580,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.0.7 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.0.8 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

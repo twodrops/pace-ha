@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.0.6
+ * Version: 1.0.8
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.4';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.8';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -352,6 +352,12 @@ class PaceDashboard extends HTMLElement {
     const ip = this._getState(this._resolve('public_ip', e.public_ip, 'sensor'));
     const netIpEl = this.shadowRoot.querySelector('.net-ip');
     if (netIpEl) netIpEl.textContent = ip || '';
+    const netEntityId = this._resolve('internet_connected', e.internet_connected, 'binary_sensor');
+    const heartbeatEl = this.shadowRoot.querySelector('.heartbeat-strip');
+    if (heartbeatEl) {
+      const recentChecks = this._hass.states[netEntityId]?.attributes?.recent_checks;
+      heartbeatEl.innerHTML = renderHeartbeatBars(recentChecks, 20);
+    }
 
     // Last test
     const lastTestEl = this.shadowRoot.querySelector('.last-test');
@@ -812,6 +818,10 @@ class PaceDashboard extends HTMLElement {
           .net-state { display: inline-block; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); }
           .net-state.online { color: var(--ls-success, #4ad19a); }
           .net-ip { font-size: 10px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #64748b); margin-top: 2px; }
+          .heartbeat-strip { display: flex; justify-content: flex-end; gap: 1px; margin-top: 4px; }
+          .hb-bar { width: 3px; height: 10px; background: var(--divider-color, #2a3142); }
+          .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
+          .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
 
           .metrics-grid {
             display: grid;
@@ -1131,6 +1141,7 @@ class PaceDashboard extends HTMLElement {
             .chart-yaxis { display: none; }
             .chart-xaxis { padding-left: 0; }
             .footer { padding-top: 8px; }
+            .heartbeat-strip { display: none; }
           }
   </style>
 
@@ -1143,6 +1154,7 @@ class PaceDashboard extends HTMLElement {
             <div class="net-status">
               <div class="net-state">OFFLINE</div>
               <div class="net-ip"></div>
+              <div class="heartbeat-strip"></div>
             </div>
           </div>
 
@@ -1530,4 +1542,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.0.6 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.0.8 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

@@ -160,3 +160,8 @@ MAX_CONNECTIVITY_CHECK_INTERVAL = 300  # 5 minutes
 CONNECTIVITY_CHECK_URL = "https://api.ipify.org?format=json"
 CONNECTIVITY_CHECK_TIMEOUT = 10  # seconds
 
+# Number of recent connectivity-check results kept for the Lovelace cards'
+# heartbeat-style trend display (a rolling window of pass/fail, not a true
+# packet-loss measurement - see _async_check_connectivity's docstring).
+CONNECTIVITY_HISTORY_SIZE = 20
+

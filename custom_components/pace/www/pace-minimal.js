@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.0.7
+ * Version: 1.0.9
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.4';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.8';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -155,12 +155,18 @@ class PaceMinimal extends HTMLElement {
       netDot.title = netState === 'on' ? 'Internet: Connected' : netState === 'off' ? 'Internet: Disconnected' : 'Internet: Unknown';
     }
 
+    const netEntityId = this._resolve('internet_connected', e.internet_connected, 'binary_sensor');
+    const heartbeatEl = this.shadowRoot.querySelector('.heartbeat-strip');
+    if (heartbeatEl) {
+      const recentChecks = this._hass.states[netEntityId]?.attributes?.recent_checks;
+      heartbeatEl.innerHTML = renderHeartbeatBars(recentChecks, 12);
+    }
+
     const ip = this._getRawState(this._resolve('public_ip', e.public_ip, 'sensor'));
     const ipEl = this.shadowRoot.querySelector('.ip-text');
     if (ipEl) {
       const ipValid = ip && ip !== 'unknown' && ip !== 'unavailable';
-      ipEl.hidden = !ipValid;
-      if (ipValid) ipEl.textContent = `IP: ${ip}`;
+      ipEl.textContent = ipValid ? `IP: ${ip}` : 'Link';
     }
 
     restoreScroll();
@@ -336,23 +342,31 @@ class PaceMinimal extends HTMLElement {
         }
         .arrow-down { color: var(--pace-accent-color, var(--ls-accent, #2b6fd9)); }
         .arrow-up { color: var(--ls-upload, #6250d6); }
-        .ping-row {
+        .status-row {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        .ping-row,
+        .link-row {
           position: relative;
           display: flex;
           align-items: center;
+          justify-content: space-between;
           gap: 8px;
           font-size: 14px;
           color: var(--secondary-text-color, #94a3b8);
-          margin-bottom: 12px;
           background: var(--ls-panel, var(--secondary-background-color, #10141b));
           padding: 8px 16px;
           border-radius: 0;
           border: 1px solid var(--divider-color, #2a3142);
-          width: fit-content;
+          flex: 1;
+          min-width: 0;
           cursor: pointer;
           transition: background-color 0.2s;
         }
-        .ping-row:hover {
+        .ping-row:hover,
+        .link-row:hover {
           background: var(--ls-panel, #10141b);
           filter: brightness(1.15);
         }
@@ -360,12 +374,18 @@ class PaceMinimal extends HTMLElement {
           color: var(--ls-ping, #c97b1a);
           font-weight: 700;
         }
-        .ip-text {
+        .link-row .ip-text {
           font-size: 11px;
-          color: var(--secondary-text-color, #64748b);
           font-family: ${TERMINAL_FONT_MONO};
-          margin-bottom: 16px;
+          color: var(--secondary-text-color, #64748b);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
+        .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; }
+        .hb-bar { width: 2px; height: 8px; background: var(--divider-color, #2a3142); }
+        .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
+        .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
         .test-btn {
           width: 100%;
           padding: 12px;
@@ -418,11 +438,15 @@ class PaceMinimal extends HTMLElement {
           </div>
         </div>
 
-        <div class="ping-row">
-          ${labels.ping}: <span class="ping-value">--</span>
+        <div class="status-row">
+          <div class="ping-row">
+            ${labels.ping}: <span class="ping-value">--</span>
+          </div>
+          <div class="link-row">
+            <span class="ip-text">Link</span>
+            <span class="heartbeat-strip"></span>
+          </div>
         </div>
-
-        <div class="ip-text" hidden></div>
 
         <button class="test-btn">Run Test</button>
       </div>
@@ -436,6 +460,7 @@ class PaceMinimal extends HTMLElement {
     this.shadowRoot.querySelector('.speed-block-dl')?.addEventListener('click', () => this._showMoreInfo(this._resolve('download', e.download)));
     this.shadowRoot.querySelector('.speed-block-ul')?.addEventListener('click', () => this._showMoreInfo(this._resolve('upload', e.upload)));
     this.shadowRoot.querySelector('.ping-row')?.addEventListener('click', () => this._showMoreInfo(this._resolve('ping', e.ping)));
+    this.shadowRoot.querySelector('.link-row')?.addEventListener('click', () => this._showMoreInfo(this._resolve('internet_connected', e.internet_connected, 'binary_sensor')));
     this.shadowRoot.querySelector('.net-dot')?.addEventListener('click', (ev) => { ev.stopPropagation(); this._showMoreInfo(this._resolve('internet_connected', e.internet_connected, 'binary_sensor')); });
   }
 }
@@ -574,4 +599,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.0.7 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.0.9 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

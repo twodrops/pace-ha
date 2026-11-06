@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections import deque
 from datetime import datetime, timedelta
 import logging
 import time
@@ -31,6 +32,7 @@ from .const import (
     CIRCUIT_BREAKER_WARNING_THRESHOLD,
     CONNECTIVITY_CHECK_TIMEOUT,
     CONNECTIVITY_CHECK_URL,
+    CONNECTIVITY_HISTORY_SIZE,
     CUSTOM_SERVER_ERROR_COOLDOWN,
     DEFAULT_BACKEND_TYPE,
     DEFAULT_CONNECTIVITY_CHECK_INTERVAL,
@@ -137,6 +139,9 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # speed test cycle - None until the first check has run.
         self.internet_connected: bool | None = None
         self.public_ip: str | None = None
+        # Rolling pass/fail history of that same check, oldest first, newest
+        # last - feeds the cards' heartbeat-strip trend display.
+        self.connectivity_history: deque[bool] = deque(maxlen=CONNECTIVITY_HISTORY_SIZE)
         self._unsub_connectivity_check: Any = None
         self._first_refresh_done: bool = False
         self._test_lock: asyncio.Lock = (
@@ -204,19 +209,19 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         are caught broadly and logged quietly rather than raised.
         """
         session = async_get_clientsession(self.hass)
+        connected = False
         try:
             async with asyncio.timeout(CONNECTIVITY_CHECK_TIMEOUT):
                 async with session.get(CONNECTIVITY_CHECK_URL) as resp:
                     if resp.status == HTTP_OK:
                         data = await resp.json(content_type=None)
                         self.public_ip = data.get("ip")
-                        self.internet_connected = True
-                    else:
-                        self.internet_connected = False
+                        connected = True
         except Exception as e:  # noqa: BLE001 - any failure just means "offline"
             _LOGGER.debug("Connectivity check failed: %s", e)
-            self.internet_connected = False
 
+        self.internet_connected = connected
+        self.connectivity_history.append(connected)
         self.async_update_listeners()
 
     @callback

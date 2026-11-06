@@ -129,6 +129,28 @@ export function beginScrollAnchor() {
 }
 
 /**
+ * Builds the inner HTML for a "heartbeat strip": one bar per recent
+ * connectivity-check result (oldest first, newest last/rightmost), colored
+ * ok/fail/unknown. `checks` is the internet_connected binary_sensor's
+ * `recent_checks` attribute (an array of booleans); `size` is the number of
+ * bars to render, left-padded with "unknown" bars if fewer samples exist
+ * yet (e.g. right after Home Assistant restarts).
+ *
+ * Deliberately a row of discrete pass/fail bars, not a numeric "packet
+ * loss %" - the underlying check only samples once per interval, so a
+ * percentage would read as far more precise than it actually is.
+ */
+export function renderHeartbeatBars(checks, size) {
+  const bars = (checks || []).slice(-size);
+  while (bars.length < size) bars.unshift(null);
+  return bars.map((ok) => {
+    const cls = ok === true ? 'hb-ok' : ok === false ? 'hb-fail' : 'hb-unknown';
+    const title = ok === true ? 'OK' : ok === false ? 'Failed' : 'No data yet';
+    return `<span class="hb-bar ${cls}" title="${title}"></span>`;
+  }).join('');
+}
+
+/**
  * Resolve a Pace entity_id, falling back to a suffix-based search
  * across hass.states when the configured/stub id doesn't exist.
  *
