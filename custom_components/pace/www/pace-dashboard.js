@@ -2,11 +2,11 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.0.0
+ * Version: 1.0.1
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
- * - Sections: 6 columns wide, auto height grid by default
+ * - Sections: 12 columns wide (full section), auto height grid by default
  * - Both layouts fully supported with proper height handling
  */
 
@@ -181,11 +181,11 @@ class PaceDashboard extends HTMLElement {
   }
 
   static getGridOptions() {
-    return { columns: 6, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   getGridOptions() {
-    return { columns: 6, rows: "auto" };
+    return { columns: 12, rows: "auto" };
   }
 
   async _fetchHistory() {
@@ -1535,4 +1535,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.0.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.0.1 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
