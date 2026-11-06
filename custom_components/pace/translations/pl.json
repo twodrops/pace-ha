@@ -1,0 +1,254 @@
+{
+  "title": "Pace",
+  "config": {
+    "step": {
+      "custom_server": {
+        "title": "Konfiguracja Niestandardowego Serwera",
+        "description": "Wprowadź URL twojego niestandardowego serwera Pace. Przykład: {example}",
+        "data": {
+          "custom_server": "URL Serwera",
+          "skip_cert_verify": "Zezwalaj na wygasłe lub samopodpisane certyfikaty SSL"
+        },
+        "data_description": {
+          "custom_server": "Pełny URL do twojego serwera Pace (musi być HTTPS chyba że weryfikacja certyfikatu jest wyłączona)",
+          "skip_cert_verify": "Włącz to jeśli twój serwer używa certyfikatu samopodpisanego lub masz problemy z SSL"
+        }
+      },
+      "user": {
+        "title": "Konfiguracja Pace",
+        "description": "Wybierz, którego backendu CLI do testu prędkości użyć. Opcje serwera w następnym kroku zależą od tego wyboru.",
+        "data": {
+          "backend_type": "Backend"
+        },
+        "data_description": {
+          "backend_type": "Wybierz, którego narzędzia CLI do testu prędkości użyć: LibreSpeed CLI (można hostować samodzielnie), Ookla CLI (oficjalne, wymaga akceptacji warunków licencji/RODO Ookla) lub speedtest-go (open source, ta sama sieć serwerów co Ookla)"
+        }
+      },
+      "server": {
+        "title": "Serwer i ustawienia testu",
+        "description": "Skonfiguruj Pace do testowania prędkości sieci. Ta integracja będzie monitorować prędkość Twojego połączenia internetowego w regularnych odstępach czasu.",
+        "data": {
+          "server_selection": "Wybór serwera",
+          "custom_server": "Niestandardowy adres URL serwera",
+          "auto_update": "Włącz automatyczne testy prędkości",
+          "scan_interval": "Interwał testu",
+          "start_time": "Czas rozpoczęcia",
+          "test_timeout": "Limit czasu testu (sekundy)",
+          "source_interface": "Źródłowy interfejs sieciowy",
+          "source_ip": "Źródłowy adres IP",
+          "fallback_to_closest": "Powrót do automatycznego serwera w przypadku błędu",
+          "isp_download_speed": "Prędkość pobierania zadeklarowana przez ISP (Mbit/s)",
+          "isp_upload_speed": "Prędkość wysyłania zadeklarowana przez ISP (Mbit/s)",
+          "auto_register_cards": "Zainstaluj i zarejestruj karty Lovelace"
+        },
+        "data_description": {
+          "server_selection": "Wybierz 'Automatyczny', aby użyć najlepszego serwera, wybierz konkretny serwer lub 'Niestandardowy', aby użyć własnego (tylko backendy LibreSpeed i speedtest-go - Ookla nie ma opcji własnego serwera)",
+          "auto_update": "Jeśli włączone, testy prędkości będą uruchamiane automatycznie w określonym interwale",
+          "scan_interval": "Jak często uruchamiane są automatyczne testy prędkości (minimum 30 minut, maksimum 24 godziny)",
+          "start_time": "Opcjonalnie: wyrównaj harmonogram do konkretnej godziny (np. '00:00' plus interwał 1 godziny uruchamia się co pełną godzinę). Pozostaw puste, aby uruchamiać po prostu co interwał od momentu konfiguracji.",
+          "test_timeout": "Maksymalny czas dozwolony na zakończenie pojedynczego testu prędkości (60-600 sekund)",
+          "source_interface": "Opcjonalnie: powiąż test prędkości z konkretnym interfejsem sieciowym na tym hoście Home Assistant (np. 'eth0'). Dotyczy tylko tego urządzenia, nie innych urządzeń w sieci.",
+          "source_ip": "Opcjonalnie: powiąż test prędkości z konkretnym źródłowym adresem IP na tym hoście Home Assistant. Dotyczy tylko tego urządzenia, nie innych urządzeń w sieci.",
+          "fallback_to_closest": "Jeśli test względem skonfigurowanego serwera zakończy się niepowodzeniem, automatycznie ponów próbę raz, używając najbliższego/automatycznego serwera zamiast się poddawać",
+          "isp_download_speed": "Prędkość pobierania zadeklarowana przez Twojego ISP, używana do obliczania zgodności z planem (pozostaw 0, aby wyłączyć)",
+          "isp_upload_speed": "Prędkość wysyłania zadeklarowana przez Twojego ISP, używana do obliczania zgodności z planem (pozostaw 0, aby wyłączyć)",
+          "auto_register_cards": "Jeśli włączone, dołączone pliki kart pulpitu są automatycznie kopiowane do /config/www/pace i rejestrowane jako zasoby pulpitu Lovelace. Jeśli wyłączone, pliki kart i zasoby są usuwane."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć z serwerem Pace",
+      "invalid_server": "Nieprawidłowy wybór serwera",
+      "custom_server_required": "Wymagany jest niestandardowy URL serwera",
+      "invalid_url": "Nieprawidłowy format URL",
+      "ssl_error": "Weryfikacja certyfikatu SSL nie powiodła się",
+      "timeout": "Przekroczono limit czasu połączenia",
+      "unknown": "Wystąpił nieoczekiwany błąd",
+      "invalid_scan_interval": "Interwał testu musi wynosić od 30 minut do 24 godzin",
+      "invalid_source_ip": "Nieprawidłowy źródłowy adres IP",
+      "server_id_requires_librespeed": "Konkretne ID serwera jest prawidłowe tylko dla backendu LibreSpeed. Wybierz 'Automatyczny' lub przełącz z powrotem na LibreSpeed."
+    },
+    "abort": {
+      "already_configured": "Pace jest już skonfigurowany",
+      "cannot_download_cli": "Nie udało się pobrać Pace CLI",
+      "unsupported_platform": "Platforma nieobsługiwana dla backendu CLI"
+    }
+  },
+  "options": {
+    "step": {
+      "custom_server": {
+        "title": "Konfiguracja Niestandardowego Serwera",
+        "description": "Skonfiguruj swój niestandardowy serwer Pace. Przykład: {example}",
+        "data": {
+          "custom_server": "URL Serwera",
+          "skip_cert_verify": "Zezwalaj na wygasłe lub samopodpisane certyfikaty SSL"
+        }
+      },
+      "init": {
+        "title": "Opcje Pace",
+        "description": "Wybierz, którego backendu CLI do testu prędkości użyć. Opcje serwera w następnym kroku zależą od tego wyboru.",
+        "data": {
+          "backend_type": "Backend"
+        },
+        "data_description": {
+          "backend_type": "Przełączaj między LibreSpeed CLI, Ookla CLI lub speedtest-go - encje pozostają takie same niezależnie od backendu"
+        }
+      },
+      "server": {
+        "title": "Serwer i ustawienia testu",
+        "description": "Zmień ustawienia Pace. Zmiany będą miały zastosowanie przy następnym teście prędkości.",
+        "data": {
+          "server_selection": "Wybór serwera",
+          "custom_server": "Niestandardowy adres URL serwera",
+          "auto_update": "Włącz automatyczne testy prędkości",
+          "scan_interval": "Interwał testu",
+          "start_time": "Czas rozpoczęcia",
+          "test_timeout": "Limit czasu testu (sekundy)",
+          "source_interface": "Źródłowy interfejs sieciowy",
+          "source_ip": "Źródłowy adres IP",
+          "fallback_to_closest": "Powrót do automatycznego serwera w przypadku błędu",
+          "isp_download_speed": "Prędkość pobierania zadeklarowana przez ISP (Mbit/s)",
+          "isp_upload_speed": "Prędkość wysyłania zadeklarowana przez ISP (Mbit/s)",
+          "auto_register_cards": "Zainstaluj i zarejestruj karty Lovelace"
+        },
+        "data_description": {
+          "server_selection": "Wybierz 'Automatyczny', aby użyć najlepszego serwera, wybierz konkretny serwer lub 'Niestandardowy', aby użyć własnego (tylko backendy LibreSpeed i speedtest-go - Ookla nie ma opcji własnego serwera)",
+          "auto_update": "Jeśli włączone, testy prędkości będą uruchamiane automatycznie w określonym interwale",
+          "scan_interval": "Jak często uruchamiane są automatyczne testy prędkości (minimum 30 minut, maksimum 24 godziny)",
+          "start_time": "Opcjonalnie: wyrównaj harmonogram do konkretnej godziny (np. '00:00' plus interwał 1 godziny uruchamia się co pełną godzinę). Pozostaw puste, aby uruchamiać po prostu co interwał od momentu konfiguracji.",
+          "test_timeout": "Maksymalny czas dozwolony na zakończenie pojedynczego testu prędkości (60-600 sekund)",
+          "source_interface": "Opcjonalnie: powiąż test prędkości z konkretnym interfejsem sieciowym na tym hoście Home Assistant (np. 'eth0'). Dotyczy tylko tego urządzenia, nie innych urządzeń w sieci.",
+          "source_ip": "Opcjonalnie: powiąż test prędkości z konkretnym źródłowym adresem IP na tym hoście Home Assistant. Dotyczy tylko tego urządzenia, nie innych urządzeń w sieci.",
+          "fallback_to_closest": "Jeśli test względem skonfigurowanego serwera zakończy się niepowodzeniem, automatycznie ponów próbę raz, używając najbliższego/automatycznego serwera zamiast się poddawać",
+          "isp_download_speed": "Prędkość pobierania zadeklarowana przez Twojego ISP, używana do obliczania zgodności z planem (pozostaw 0, aby wyłączyć)",
+          "isp_upload_speed": "Prędkość wysyłania zadeklarowana przez Twojego ISP, używana do obliczania zgodności z planem (pozostaw 0, aby wyłączyć)",
+          "auto_register_cards": "Jeśli włączone, dołączone pliki kart pulpitu są automatycznie kopiowane do /config/www/pace i rejestrowane jako zasoby pulpitu Lovelace. Jeśli wyłączone, pliki kart i zasoby są usuwane."
+        }
+      }
+    },
+    "error": {
+      "invalid_server": "Nieprawidłowy wybór serwera",
+      "custom_server_required": "Wymagany jest niestandardowy URL serwera",
+      "invalid_url": "Nieprawidłowy format URL",
+      "invalid_scan_interval": "Interwał testu musi wynosić od 30 minut do 24 godzin",
+      "invalid_source_ip": "Nieprawidłowy źródłowy adres IP",
+      "server_id_requires_librespeed": "Konkretne ID serwera jest prawidłowe tylko dla backendu LibreSpeed. Wybierz 'Automatyczny' lub przełącz z powrotem na LibreSpeed."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "download": {
+        "name": "Prędkość Pobierania"
+      },
+      "upload": {
+        "name": "Prędkość Wysyłania"
+      },
+      "ping": {
+        "name": "Ping"
+      },
+      "jitter": {
+        "name": "Jitter"
+      },
+      "packet_loss": {
+        "name": "Utrata Pakietów"
+      },
+      "data_downloaded": {
+        "name": "Dane Testu Pobrane"
+      },
+      "data_uploaded": {
+        "name": "Dane Testu Wysłane"
+      },
+      "lifetime_download": {
+        "name": "Całkowite Dane Pobrane"
+      },
+      "lifetime_upload": {
+        "name": "Całkowite Dane Wysłane"
+      },
+      "server_name": {
+        "name": "Nazwa Serwera"
+      },
+      "server_location": {
+        "name": "Lokalizacja Serwera"
+      },
+      "server_sponsor": {
+        "name": "Sponsor Serwera"
+      },
+      "last_test": {
+        "name": "Czas Ostatniego Testu"
+      },
+      "backend": {
+        "name": "Backend",
+        "state": {
+          "librespeed": "LibreSpeed CLI",
+          "ookla": "Ookla CLI",
+          "speedtest_go": "speedtest-go CLI"
+        }
+      }
+    },
+    "button": {
+      "run_test": {
+        "name": "Ręczny Test Prędkości"
+      }
+    },
+    "binary_sensor": {
+      "running": {
+        "name": "Test Prędkości Uruchomiony"
+      }
+    }
+  },
+  "services": {
+    "run_speed_test": {
+      "name": "Uruchom Test Prędkości",
+      "description": "Ręcznie uruchom test prędkości na określonej instancji Pace",
+      "fields": {
+        "entry_id": {
+          "name": "Wpis Konfiguracji",
+          "description": "Instancja Pace na której uruchomić test (opcjonalnie, używa pierwszej instancji jeśli nie określono)"
+        },
+        "server_id": {
+          "name": "ID Serwera",
+          "description": "Opcjonalnie: Konkretny ID serwera do użycia w tym teście (zastępuje skonfigurowany serwer)"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "speed_test_in_progress": "Test prędkości już w toku",
+    "speed_test_failed": "Test prędkości nie powiódł się: {error}",
+    "server_not_found": "Serwer nie znaleziony",
+    "network_error": "Błąd sieci: {error}",
+    "timeout_error": "Test prędkości przekroczył limit czasu po {timeout} sekundach",
+    "cli_not_available": "Pace CLI niedostępny",
+    "cli_download_failed": "Nie udało się pobrać pliku binarnego CLI",
+    "invalid_configuration": "Nieprawidłowa konfiguracja",
+    "circuit_breaker_open": "Zbyt wiele kolejnych błędów, wyłącznik automatyczny otwarty",
+    "session_creation_failed": "Nie udało się utworzyć sesji HTTP",
+    "checksum_mismatch": "Suma kontrolna pobranego pliku nie pasuje do oczekiwanej wartości"
+  },
+  "issues": {
+    "cli_download_failed": {
+      "title": "Pobieranie Pace CLI Nie Powiodło Się",
+      "description": "Plik binarny Pace CLI nie mógł zostać pobrany automatycznie. Może to być spowodowane problemami z połączeniem sieciowym lub ograniczeniami zapory sieciowej.\n\nMożesz:\n• Spróbować pobrać ponownie używając przepływu naprawczego\n• Przełączyć się na inny backend w opcjach\n• Sprawdzić swoje połączenie internetowe"
+    },
+    "custom_server_unreachable": {
+      "title": "Niestandardowy Serwer Pace Nieosiągalny",
+      "description": "Twój niestandardowy serwer Pace pod {server_url} jest obecnie nieosiągalny. Może to być spowodowane:\n\n• Serwer jest tymczasowo wyłączony\n• Problemy z połączeniem sieciowym\n• Nieprawidłowy URL serwera\n• Problemy z certyfikatem SSL\n\nAby rozwiązać ten problem, przejdź do {options_path} i:\n• Zaktualizuj URL serwera\n• Sprawdź ustawienia certyfikatu SSL\n• Przełącz się na automatyczny wybór serwera"
+    },
+    "repeated_test_failures": {
+      "title": "Testy Pace Wielokrotnie Zawodzą",
+      "description": "Testy prędkości zawiodły {failure_count} razy z rzędu. To może wskazywać na:\n\n• Problemy z połączeniem sieciowym\n• Problemy z kompatybilnością serwera\n• Problemy z wydajnością backendu\n\nZalecane rozwiązania:\n• {backend_switch}\n• Spróbuj automatycznego wyboru serwera\n• Sprawdź swoje połączenie internetowe\n• Przejrzyj logi Home Assistant dla szczegółów"
+    },
+    "circuit_breaker_open": {
+      "title": "Wyłącznik Automatyczny Pace Aktywowany",
+      "description": "Testy prędkości zostały tymczasowo wyłączone po {failure_count} kolejnych błędach aby zapobiec przeciążeniu systemu.\n\n{manual_test}\n\nAby rozwiązać:\n• Sprawdź swoje połączenie sieciowe\n• Zweryfikuj dostępność serwera\n• Przejrzyj logi błędów dla konkretnych problemów\n• Rozważ zmianę backendu"
+    }
+  },
+  "selector": {
+    "server_selection": {
+      "options": {
+        "automatic": "Automatyczny",
+        "custom": "Niestandardowy Serwer"
+      }
+    }
+  }
+}

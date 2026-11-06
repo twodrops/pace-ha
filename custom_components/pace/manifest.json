@@ -1,0 +1,15 @@
+{
+  "domain": "pace",
+  "name": "PACE",
+  "after_dependencies": ["lovelace"],
+  "categories": ["computers_network.monitoring"],
+  "codeowners": ["@twodrops"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/twodrops/pace-ha",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/twodrops/pace-ha/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,90 @@
+rules:
+  # Bronze Tier
+  action-setup:
+    status: exempt
+    comment: No service actions provided
+  appropriate-polling: done
+  brands: done
+  common-modules: done
+  config-flow-test-coverage:
+    status: done
+    comment: 97% coverage on config_flow.py
+  config-flow: done
+  dependency-transparency: done
+  docs-actions:
+    status: exempt
+    comment: No service actions to document
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+
+  # Silver Tier
+  action-exceptions:
+    status: exempt
+    comment: No service actions provided
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates:
+    status: todo
+    comment: Need to define PARALLEL_UPDATES constant
+  reauthentication-flow:
+    status: exempt
+    comment: No authentication required
+  test-coverage:
+    status: done
+    comment: 202 tests, 73% overall (90%+ on integration code, lower on backend clients)
+
+  # Gold Tier
+  devices: done
+  diagnostics: done
+  discovery-update-info:
+    status: exempt
+    comment: Not a locally discovered integration
+  discovery:
+    status: exempt
+    comment: Cloud service, not locally discoverable
+  docs-data-update: todo
+  docs-examples: todo
+  docs-known-limitations: todo
+  docs-supported-devices:
+    status: exempt
+    comment: No physical devices - network speed test service
+  docs-supported-functions: todo
+  docs-troubleshooting: todo
+  docs-use-cases: todo
+  dynamic-devices:
+    status: done
+    comment: Supports multiple instances with different configurations
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: todo
+    comment: Diagnostic sensors should be disabled by default
+  entity-translations: done
+  exception-translations: done
+  icon-translations:
+    status: exempt
+    comment: Using standard MDI icons
+  reconfiguration-flow: done
+  repair-issues: done
+  stale-devices:
+    status: exempt
+    comment: One device per config entry, no stale device scenario
+
+  # Platinum Tier
+  async-dependency: done
+  inject-websession:
+    status: todo
+    comment: Native backend creates custom session instead of using async_get_clientsession
+  strict-typing: done

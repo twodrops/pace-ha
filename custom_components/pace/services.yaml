@@ -1,0 +1,15 @@
+register_card_resources:
+  name: Register Card Resources
+  description: >
+    Copies bundled Lovelace card assets to /config/www/pace and registers
+    them as Lovelace resources. Run this once after installation (or after
+    enabling it in options), then refresh your browser. Cards will be
+    available in the "Add Card" picker.
+  fields: {}
+
+remove_card_resources:
+  name: Remove Card Resources
+  description: >
+    Removes bundled Lovelace card assets from /config/www/pace and
+    unregisters the Lovelace resources.
+  fields: {}

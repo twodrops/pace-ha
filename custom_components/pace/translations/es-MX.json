@@ -1,0 +1,254 @@
+{
+  "title": "Pace",
+  "config": {
+    "step": {
+      "custom_server": {
+        "title": "Configuración de Servidor Personalizado",
+        "description": "Ingresa la URL de tu servidor Pace personalizado. Ejemplo: {example}",
+        "data": {
+          "custom_server": "URL del Servidor",
+          "skip_cert_verify": "Permitir certificados SSL vencidos o autofirmados"
+        },
+        "data_description": {
+          "custom_server": "URL completa de tu servidor Pace (debe ser HTTPS a menos que la verificación de certificado esté deshabilitada)",
+          "skip_cert_verify": "Habilita esto si tu servidor usa un certificado autofirmado o si tienes problemas con SSL"
+        }
+      },
+      "user": {
+        "title": "Configurar Pace",
+        "description": "Elija qué backend de prueba de velocidad CLI usar. Las opciones de servidor del siguiente paso dependen de esta elección.",
+        "data": {
+          "backend_type": "Backend"
+        },
+        "data_description": {
+          "backend_type": "Elija qué herramienta de prueba de velocidad CLI usar: LibreSpeed CLI (auto-hospedable), Ookla CLI (oficial, requiere aceptar los términos de licencia/RGPD de Ookla), o speedtest-go (código abierto, misma red de servidores que Ookla)"
+        }
+      },
+      "server": {
+        "title": "Servidor y configuración de pruebas",
+        "description": "Configure Pace para pruebas de velocidad de red. Esta integración monitoreará la velocidad de su conexión a internet en intervalos regulares.",
+        "data": {
+          "server_selection": "Selección de servidor",
+          "custom_server": "URL de servidor personalizado",
+          "auto_update": "Habilitar pruebas de velocidad automáticas",
+          "scan_interval": "Intervalo de prueba",
+          "start_time": "Hora de inicio",
+          "test_timeout": "Tiempo de espera de prueba (segundos)",
+          "source_interface": "Interfaz de red de origen",
+          "source_ip": "Dirección IP de origen",
+          "fallback_to_closest": "Volver al servidor automático en caso de falla",
+          "isp_download_speed": "Velocidad de descarga contratada con el ISP (Mbit/s)",
+          "isp_upload_speed": "Velocidad de subida contratada con el ISP (Mbit/s)",
+          "auto_register_cards": "Instalar y registrar tarjetas Lovelace"
+        },
+        "data_description": {
+          "server_selection": "Seleccione 'Automático' para usar el mejor servidor, elija un servidor específico, o 'Personalizado' para usar el suyo (solo backends LibreSpeed y speedtest-go - Ookla no tiene opción de servidor auto-hospedado)",
+          "auto_update": "Cuando está habilitado, las pruebas de velocidad se ejecutarán automáticamente en el intervalo especificado",
+          "scan_interval": "Con qué frecuencia se ejecutan las pruebas de velocidad automáticas (mínimo 30 minutos, máximo 24 horas)",
+          "start_time": "Opcional: alinear el horario a una hora exacta (p. ej. '00:00' más un intervalo de 1 hora se ejecuta cada hora en punto). Déjelo en blanco para ejecutar cada intervalo desde la configuración.",
+          "test_timeout": "Tiempo máximo permitido para completar una prueba de velocidad (60-600 segundos)",
+          "source_interface": "Opcional: vincular la prueba de velocidad a una interfaz de red específica en este host de Home Assistant (p. ej. 'eth0'). Solo afecta a esta máquina, no a otros dispositivos en su red.",
+          "source_ip": "Opcional: vincular la prueba de velocidad a una dirección IP de origen específica en este host de Home Assistant. Solo afecta a esta máquina, no a otros dispositivos en su red.",
+          "fallback_to_closest": "Si una prueba contra el servidor configurado falla, reintentar automáticamente una vez usando el servidor más cercano/automático en lugar de rendirse",
+          "isp_download_speed": "La velocidad de descarga contratada con su ISP, usada para calcular el cumplimiento del plan (déjelo en 0 para deshabilitar)",
+          "isp_upload_speed": "La velocidad de subida contratada con su ISP, usada para calcular el cumplimiento del plan (déjelo en 0 para deshabilitar)",
+          "auto_register_cards": "Cuando está habilitado, los archivos de tarjetas del panel incluidos se copian automáticamente a /config/www/pace y se registran como recursos del panel Lovelace. Cuando está deshabilitado, los archivos de tarjetas y recursos se eliminan."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "No se pudo conectar al servidor Pace",
+      "invalid_server": "Selección de servidor inválida",
+      "custom_server_required": "Se requiere la URL del servidor personalizado",
+      "invalid_url": "Formato de URL inválido",
+      "ssl_error": "Falló la verificación del certificado SSL",
+      "timeout": "Se agotó el tiempo de conexión",
+      "unknown": "Ocurrió un error inesperado",
+      "invalid_scan_interval": "El intervalo de prueba debe estar entre 30 minutos y 24 horas",
+      "invalid_source_ip": "Dirección IP de origen inválida",
+      "server_id_requires_librespeed": "Un ID de servidor específico solo es válido para el backend LibreSpeed. Elija 'Automático' o vuelva a LibreSpeed."
+    },
+    "abort": {
+      "already_configured": "Pace ya está configurado",
+      "cannot_download_cli": "No se pudo descargar el CLI de Pace",
+      "unsupported_platform": "Plataforma no soportada para el backend CLI"
+    }
+  },
+  "options": {
+    "step": {
+      "custom_server": {
+        "title": "Configuración de Servidor Personalizado",
+        "description": "Configura tu servidor Pace personalizado. Ejemplo: {example}",
+        "data": {
+          "custom_server": "URL del Servidor",
+          "skip_cert_verify": "Permitir certificados SSL vencidos o autofirmados"
+        }
+      },
+      "init": {
+        "title": "Opciones de Pace",
+        "description": "Elija qué backend de prueba de velocidad CLI usar. Las opciones de servidor del siguiente paso dependen de esta elección.",
+        "data": {
+          "backend_type": "Backend"
+        },
+        "data_description": {
+          "backend_type": "Cambie entre LibreSpeed CLI, Ookla CLI o speedtest-go - las entidades permanecen iguales sin importar el backend"
+        }
+      },
+      "server": {
+        "title": "Servidor y configuración de pruebas",
+        "description": "Modifique la configuración de Pace. Los cambios tendrán efecto en la próxima prueba de velocidad.",
+        "data": {
+          "server_selection": "Selección de servidor",
+          "custom_server": "URL de servidor personalizado",
+          "auto_update": "Habilitar pruebas de velocidad automáticas",
+          "scan_interval": "Intervalo de prueba",
+          "start_time": "Hora de inicio",
+          "test_timeout": "Tiempo de espera de prueba (segundos)",
+          "source_interface": "Interfaz de red de origen",
+          "source_ip": "Dirección IP de origen",
+          "fallback_to_closest": "Volver al servidor automático en caso de falla",
+          "isp_download_speed": "Velocidad de descarga contratada con el ISP (Mbit/s)",
+          "isp_upload_speed": "Velocidad de subida contratada con el ISP (Mbit/s)",
+          "auto_register_cards": "Instalar y registrar tarjetas Lovelace"
+        },
+        "data_description": {
+          "server_selection": "Seleccione 'Automático' para usar el mejor servidor, elija un servidor específico, o 'Personalizado' para usar el suyo (solo backends LibreSpeed y speedtest-go - Ookla no tiene opción de servidor auto-hospedado)",
+          "auto_update": "Cuando está habilitado, las pruebas de velocidad se ejecutarán automáticamente en el intervalo especificado",
+          "scan_interval": "Con qué frecuencia se ejecutan las pruebas de velocidad automáticas (mínimo 30 minutos, máximo 24 horas)",
+          "start_time": "Opcional: alinear el horario a una hora exacta (p. ej. '00:00' más un intervalo de 1 hora se ejecuta cada hora en punto). Déjelo en blanco para ejecutar cada intervalo desde la configuración.",
+          "test_timeout": "Tiempo máximo permitido para completar una prueba de velocidad (60-600 segundos)",
+          "source_interface": "Opcional: vincular la prueba de velocidad a una interfaz de red específica en este host de Home Assistant (p. ej. 'eth0'). Solo afecta a esta máquina, no a otros dispositivos en su red.",
+          "source_ip": "Opcional: vincular la prueba de velocidad a una dirección IP de origen específica en este host de Home Assistant. Solo afecta a esta máquina, no a otros dispositivos en su red.",
+          "fallback_to_closest": "Si una prueba contra el servidor configurado falla, reintentar automáticamente una vez usando el servidor más cercano/automático en lugar de rendirse",
+          "isp_download_speed": "La velocidad de descarga contratada con su ISP, usada para calcular el cumplimiento del plan (déjelo en 0 para deshabilitar)",
+          "isp_upload_speed": "La velocidad de subida contratada con su ISP, usada para calcular el cumplimiento del plan (déjelo en 0 para deshabilitar)",
+          "auto_register_cards": "Cuando está habilitado, los archivos de tarjetas del panel incluidos se copian automáticamente a /config/www/pace y se registran como recursos del panel Lovelace. Cuando está deshabilitado, los archivos de tarjetas y recursos se eliminan."
+        }
+      }
+    },
+    "error": {
+      "invalid_server": "Selección de servidor inválida",
+      "custom_server_required": "Se requiere la URL del servidor personalizado",
+      "invalid_url": "Formato de URL inválido",
+      "invalid_scan_interval": "El intervalo de prueba debe estar entre 30 minutos y 24 horas",
+      "invalid_source_ip": "Dirección IP de origen inválida",
+      "server_id_requires_librespeed": "Un ID de servidor específico solo es válido para el backend LibreSpeed. Elija 'Automático' o vuelva a LibreSpeed."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "download": {
+        "name": "Velocidad de Descarga"
+      },
+      "upload": {
+        "name": "Velocidad de Carga"
+      },
+      "ping": {
+        "name": "Ping"
+      },
+      "jitter": {
+        "name": "Jitter"
+      },
+      "packet_loss": {
+        "name": "Pérdida de Paquetes"
+      },
+      "data_downloaded": {
+        "name": "Datos de Prueba Descargados"
+      },
+      "data_uploaded": {
+        "name": "Datos de Prueba Cargados"
+      },
+      "lifetime_download": {
+        "name": "Datos Totales Descargados"
+      },
+      "lifetime_upload": {
+        "name": "Datos Totales Cargados"
+      },
+      "server_name": {
+        "name": "Nombre del Servidor"
+      },
+      "server_location": {
+        "name": "Ubicación del Servidor"
+      },
+      "server_sponsor": {
+        "name": "Patrocinador del Servidor"
+      },
+      "last_test": {
+        "name": "Hora de Última Prueba"
+      },
+      "backend": {
+        "name": "Backend",
+        "state": {
+          "librespeed": "LibreSpeed CLI",
+          "ookla": "Ookla CLI",
+          "speedtest_go": "speedtest-go CLI"
+        }
+      }
+    },
+    "button": {
+      "run_test": {
+        "name": "Prueba de Velocidad Manual"
+      }
+    },
+    "binary_sensor": {
+      "running": {
+        "name": "Prueba de Velocidad en Ejecución"
+      }
+    }
+  },
+  "services": {
+    "run_speed_test": {
+      "name": "Ejecutar Prueba de Velocidad",
+      "description": "Activar manualmente una prueba de velocidad en una instancia Pace específica",
+      "fields": {
+        "entry_id": {
+          "name": "Entrada de Configuración",
+          "description": "La instancia Pace para ejecutar la prueba (opcional, usa la primera instancia si no se especifica)"
+        },
+        "server_id": {
+          "name": "ID del Servidor",
+          "description": "Opcional: ID de servidor específico para usar en esta prueba (anula el servidor configurado)"
+        }
+      }
+    }
+  },
+  "selector": {
+    "server_selection": {
+      "options": {
+        "automatic": "Automático",
+        "custom": "Servidor Personalizado"
+      }
+    }
+  },
+  "exceptions": {
+    "speed_test_in_progress": "Prueba de velocidad ya en progreso",
+    "speed_test_failed": "Prueba de velocidad falló: {error}",
+    "server_not_found": "Servidor no encontrado",
+    "network_error": "Error de red: {error}",
+    "timeout_error": "Prueba de velocidad agotó tiempo después de {timeout} segundos",
+    "cli_not_available": "Pace CLI no está disponible",
+    "cli_download_failed": "Error al descargar binario CLI",
+    "invalid_configuration": "Configuración inválida",
+    "circuit_breaker_open": "Demasiadas fallas consecutivas, el interruptor de circuito está abierto",
+    "session_creation_failed": "Error al crear sesión HTTP",
+    "checksum_mismatch": "La suma de verificación del archivo descargado no coincide con el valor esperado"
+  },
+  "issues": {
+    "cli_download_failed": {
+      "title": "Descarga de Pace CLI Falló",
+      "description": "El binario de Pace CLI no se pudo descargar automáticamente. Esto puede deberse a problemas de conectividad de red o restricciones de firewall.\n\nPuede:\n• Intentar descargar nuevamente usando el flujo de reparación\n• Cambiar a otro backend en las opciones\n• Verificar su conexión a internet"
+    },
+    "custom_server_unreachable": {
+      "title": "Servidor Pace Personalizado Inalcanzable",
+      "description": "Su servidor Pace personalizado en {server_url} está actualmente inalcanzable. Esto podría deberse a:\n\n• El servidor está temporalmente fuera de línea\n• Problemas de conectividad de red\n• URL de servidor incorrecta\n• Problemas con certificado SSL\n\nPara solucionar este problema, vaya a {options_path} y:\n• Actualice la URL del servidor\n• Verifique la configuración del certificado SSL\n• Cambie a selección automática de servidor"
+    },
+    "repeated_test_failures": {
+      "title": "Pruebas Pace Fallando Repetidamente",
+      "description": "Las pruebas de velocidad han fallado {failure_count} veces seguidas. Esto puede indicar:\n\n• Problemas de conectividad de red\n• Problemas de compatibilidad del servidor\n• Problemas de rendimiento del backend\n\nSoluciones recomendadas:\n• {backend_switch}\n• Pruebe selección automática de servidor\n• Verifique su conexión a internet\n• Revise los registros de Home Assistant para detalles"
+    },
+    "circuit_breaker_open": {
+      "title": "Interruptor de Circuito Pace Activado",
+      "description": "Las pruebas de velocidad se han deshabilitado temporalmente después de {failure_count} fallas consecutivas para prevenir sobrecarga del sistema.\n\n{manual_test}\n\nPara resolver:\n• Verifique su conexión de red\n• Verifique la disponibilidad del servidor\n• Revise los registros de errores para problemas específicos\n• Considere cambiar backends"
+    }
+  }
+}
