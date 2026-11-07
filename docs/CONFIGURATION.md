@@ -15,6 +15,7 @@ During initial setup, you'll configure these parameters:
 | **Enable Automatic Updates** | Boolean | Yes | True | Run tests automatically on schedule |
 | **Update Interval** | Number | If auto enabled | 60 | Minutes between automatic tests (30-1440) |
 | **Test Timeout** | Number | No | 240 | Maximum time allowed for a single speed test (60-600 seconds) |
+| **Internet Check Interval** | Number | No | 30 | How often to check internet reachability and public IP, independent of speed tests (10-300 seconds) |
 | **Skip Certificate Verification** | Boolean | No | False | Skip SSL verification for self-signed certificates (LibreSpeed backend's custom-server mode only) ⚠️ |
 | **ISP Rated Download Speed** | Number | No | 0 (disabled) | Your ISP's advertised download speed in Mbit/s. When set above 0, enables the Download Plan Compliance sensor |
 | **ISP Rated Upload Speed** | Number | No | 0 (disabled) | Your ISP's advertised upload speed in Mbit/s. When set above 0, enables the Upload Plan Compliance sensor |
@@ -32,6 +33,7 @@ After initial setup, you can modify these parameters through the integration opt
 | **Enable Automatic Updates** | Toggle | Yes | On/Off | Enable or disable scheduled tests |
 | **Update Interval** | Slider | Yes | 30-1440 minutes | Adjust test frequency:<br>• 30-60 min: Frequent monitoring<br>• 60 min: Hourly (default)<br>• 180-360 min: Regular checks<br>• 720-1440 min: Daily monitoring |
 | **Test Timeout** | Number | Yes | 60-600 seconds | Maximum time allowed for a single speed test |
+| **Internet Check Interval** | Slider | Yes | 10-300 seconds | Adjust how often the lightweight connectivity/public-IP check runs, independent of speed tests |
 | **Skip Certificate Verification** | Toggle | Yes | On/Off | Toggle SSL verification (LibreSpeed custom-server mode only) |
 | **ISP Rated Download Speed** | Number | Yes | 0-100000 Mbit/s | Adjust or disable (0) the Download Plan Compliance sensor |
 | **ISP Rated Upload Speed** | Number | Yes | 0-100000 Mbit/s | Adjust or disable (0) the Upload Plan Compliance sensor |
@@ -51,6 +53,12 @@ After initial setup, you can modify these parameters through the integration opt
 Set **ISP Rated Download Speed** and/or **ISP Rated Upload Speed** (in Mbit/s) during setup or in options to enable the `download_compliance` / `upload_compliance` sensors. Each reports `(measured speed / rated speed) * 100`, so you can see at a glance whether your connection is meeting the speed your ISP advertises. Leaving either value at `0` (the default) disables the corresponding sensor.
 
 These sensors work identically regardless of which backend you use, since the calculation only depends on the already-measured download/upload speed.
+
+## Internet Connectivity & Heartbeat
+
+Independent of speed tests, PACE periodically checks basic internet reachability and your public IP (see **Internet Check Interval** above). This powers `binary_sensor.pace_internet_connected` and `sensor.pace_public_ip_address`, plus a rolling pass/fail history exposed as the `recent_checks` attribute on the connectivity sensor.
+
+The Dashboard and Minimal Lovelace cards visualize that history as a small "LINK" bar strip - green bars for successful checks, red for failures - giving an at-a-glance trend instead of a single online/offline flag. It's a lightweight health signal (not a precise packet-loss measurement), since it's based on one check per interval rather than a burst of pings.
 
 ## Backend Selection Guide
 

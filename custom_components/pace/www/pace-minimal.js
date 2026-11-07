@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.0.9
+ * Version: 1.1.3
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.8';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.9';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -50,6 +50,7 @@ class PaceMinimal extends HTMLElement {
         internet_connected: "binary_sensor.pace_internet_connected",
         public_ip: "sensor.pace_public_ip_address"
       },
+      title: "PACE",
       labels: {
         download: "Download",
         upload: "Upload",
@@ -62,6 +63,9 @@ class PaceMinimal extends HTMLElement {
   setConfig(config) {
     this._config = { ...PaceMinimal.getStubConfig(), ...config };
     applyHaStyleAttribute(this, this._config);
+    // Live-update the title if the card is already rendered (editor preview).
+    const titleEl = this.shadowRoot?.querySelector('.isp-text');
+    if (titleEl) titleEl.textContent = this._config.title;
   }
 
   set hass(hass) {
@@ -253,6 +257,7 @@ class PaceMinimal extends HTMLElement {
           letter-spacing: 0;
         }
         :host([ha]) .ping-row,
+        :host([ha]) .link-row,
         :host([ha]) .test-btn {
           border-radius: 8px;
         }
@@ -281,7 +286,11 @@ class PaceMinimal extends HTMLElement {
           letter-spacing: 1.5px;
           margin-bottom: 20px;
           font-weight: 600;
+          cursor: pointer;
+          transition: opacity 0.15s ease;
         }
+        .isp-text:hover { opacity: 0.8; }
+        .isp-text:active { opacity: 0.6; }
         .isp-text::before {
           content: '┃ ';
           color: var(--pace-accent-color, var(--ls-accent, #2b6fd9));
@@ -299,7 +308,10 @@ class PaceMinimal extends HTMLElement {
           flex-shrink: 0;
           background: var(--ls-danger, #e5484d);
           cursor: pointer;
+          transition: transform 0.15s ease, filter 0.15s ease;
         }
+        .net-dot:hover { filter: brightness(1.2); }
+        .net-dot:active { transform: scale(0.85); }
         .net-dot.online {
           background: var(--ls-success, #2f9d6b);
         }
@@ -315,6 +327,9 @@ class PaceMinimal extends HTMLElement {
         }
         .speed-block:hover {
           transform: translateY(-2px);
+        }
+        .speed-block:active {
+          transform: translateY(0) scale(0.97);
         }
         .speed-label {
           font-size: 10px;
@@ -362,13 +377,17 @@ class PaceMinimal extends HTMLElement {
           border: 1px solid var(--divider-color, #2a3142);
           flex: 1;
           min-width: 0;
+        }
+        .ping-row {
           cursor: pointer;
           transition: background-color 0.2s;
         }
-        .ping-row:hover,
-        .link-row:hover {
-          background: var(--ls-panel, #10141b);
+        .ping-row:hover {
+          background: var(--ls-panel, var(--secondary-background-color, #10141b));
           filter: brightness(1.15);
+        }
+        .ping-row:active {
+          filter: brightness(1.3);
         }
         .ping-value {
           color: var(--ls-ping, #c97b1a);
@@ -381,8 +400,14 @@ class PaceMinimal extends HTMLElement {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          cursor: pointer;
+          transition: opacity 0.15s ease;
         }
-        .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; }
+        .link-row .ip-text:hover { opacity: 0.8; }
+        .link-row .ip-text:active { opacity: 0.6; }
+        .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; cursor: pointer; transition: opacity 0.15s ease; }
+        .heartbeat-strip:hover { opacity: 0.8; }
+        .heartbeat-strip:active { opacity: 0.6; }
         .hb-bar { width: 2px; height: 8px; background: var(--divider-color, #2a3142); }
         .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
         .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
@@ -415,11 +440,26 @@ class PaceMinimal extends HTMLElement {
           animation: pulse 1.5s infinite;
         }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* On narrow cards (phone portrait), the IP address was competing
+           with the heartbeat strip for the same line and getting truncated
+           with an ellipsis. Stacking them gives the IP text the box's full
+           width instead. */
+        @container (max-width: 380px) {
+          .link-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+          }
+          .link-row .ip-text {
+            max-width: 100%;
+          }
+        }
       </style>
 
       <div class="card">
         <div class="header-row">
-          <div class="isp-text">Internet Speed</div>
+          <div class="isp-text">${this._config.title || 'PACE'}</div>
           <span class="net-dot" title="Internet"></span>
         </div>
 
@@ -455,12 +495,14 @@ class PaceMinimal extends HTMLElement {
     applyTerminalPalette(this.shadowRoot, this._hass);
 
     this.shadowRoot.querySelector('.test-btn')?.addEventListener('click', () => this._runTest());
+    this.shadowRoot.querySelector('.isp-text')?.addEventListener('click', () => navigateToPaceIntegration());
 
     const e = this._config.entities;
     this.shadowRoot.querySelector('.speed-block-dl')?.addEventListener('click', () => this._showMoreInfo(this._resolve('download', e.download)));
     this.shadowRoot.querySelector('.speed-block-ul')?.addEventListener('click', () => this._showMoreInfo(this._resolve('upload', e.upload)));
     this.shadowRoot.querySelector('.ping-row')?.addEventListener('click', () => this._showMoreInfo(this._resolve('ping', e.ping)));
-    this.shadowRoot.querySelector('.link-row')?.addEventListener('click', () => this._showMoreInfo(this._resolve('internet_connected', e.internet_connected, 'binary_sensor')));
+    this.shadowRoot.querySelector('.link-row .ip-text')?.addEventListener('click', (ev) => { ev.stopPropagation(); this._showMoreInfo(this._resolve('public_ip', e.public_ip, 'sensor')); });
+    this.shadowRoot.querySelector('.heartbeat-strip')?.addEventListener('click', (ev) => { ev.stopPropagation(); this._showMoreInfo(this._resolve('internet_connected', e.internet_connected, 'binary_sensor')); });
     this.shadowRoot.querySelector('.net-dot')?.addEventListener('click', (ev) => { ev.stopPropagation(); this._showMoreInfo(this._resolve('internet_connected', e.internet_connected, 'binary_sensor')); });
   }
 }
@@ -502,6 +544,18 @@ class PaceMinimalEditor extends HTMLElement {
     const displayDiv = document.createElement('div');
     displayDiv.style.cssText = "border: 1px solid var(--divider-color, #e0e0e0); border-radius: 8px; padding: 10px; background: var(--card-background-color, rgba(0,0,0,0.2));";
     displayDiv.innerHTML = `<div style="font-weight: 500; margin-bottom: 10px; color: var(--primary-text-color); font-size: 14px;">Display Settings</div>`;
+
+    const titleOption = document.createElement('div');
+    titleOption.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
+    titleOption.innerHTML = `<label style="font-size: 13px; color: var(--primary-text-color);">Title</label>`;
+    const titleInput = document.createElement('input');
+    titleInput.type = "text";
+    titleInput.value = this._config.title ?? "PACE";
+    titleInput.placeholder = "PACE";
+    titleInput.style.cssText = "padding: 6px; border-radius: 4px; border: 1px solid var(--divider-color, #888); background: var(--card-background-color, #fff); color: var(--primary-text-color, #000); width: 100px;";
+    titleInput.addEventListener('change', (e) => this.configChanged({ ...this._config, title: e.target.value || 'PACE' }));
+    titleOption.appendChild(titleInput);
+    displayDiv.appendChild(titleOption);
 
     const styleToggle = document.createElement('div');
     styleToggle.style.cssText = "display: flex; align-items: center; justify-content: space-between;";
@@ -594,9 +648,9 @@ customElements.define("pace-minimal-editor", PaceMinimalEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "pace-minimal",
-  name: "Pace - Minimal",
+  name: "PACE - Minimal",
   description: "Clean minimal speedtest card with large typography",
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.0.9 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.1.3 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

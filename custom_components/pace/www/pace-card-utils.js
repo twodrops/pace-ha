@@ -42,7 +42,10 @@ const HA_STYLE_COLOR_MAP = {
   success: 'var(--success-color, #43a047)',
   warning: 'var(--warning-color, #ffa600)',
   danger: 'var(--error-color, #db4437)',
-  panel: 'var(--ha-card-background, var(--card-background-color))'
+  // A genuinely distinct surface color from the card's own background
+  // (not --ha-card-background itself), so panel boxes stay visible with
+  // real contrast in HA style mode, in both light and dark themes.
+  panel: 'var(--secondary-background-color, var(--card-background-color))'
 };
 
 /**
@@ -79,6 +82,16 @@ export function getTerminalColor(hass, key, fallback, config) {
  */
 export function applyHaStyleAttribute(hostElement, config) {
   hostElement.toggleAttribute('ha', config?.terminal_style === false);
+}
+
+/**
+ * Navigates Home Assistant's single-page frontend to the Pace integration's
+ * settings page (Settings > Devices & Services > Pace), the same way
+ * clicking it there would - used for the cards' clickable title/header.
+ */
+export function navigateToPaceIntegration() {
+  history.pushState(null, '', '/config/integrations/integration/pace');
+  window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 }
 
 /**

@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.0.8
+ * Version: 1.1.2
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.8';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.9';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -91,6 +91,7 @@ class PaceDashboard extends HTMLElement {
         lifetime_download: "sensor.pace_lifetime_data_downloaded",
         lifetime_upload: "sensor.pace_lifetime_data_uploaded"
       },
+      title: "PACE",
       labels: {
         download: "Download",
         upload: "Upload",
@@ -120,6 +121,9 @@ class PaceDashboard extends HTMLElement {
       this._config.entities = config.entities;
     }
     applyHaStyleAttribute(this, this._config);
+    // Live-update the title if the card is already rendered (editor preview).
+    const titleEl = this.shadowRoot?.querySelector('.isp-name');
+    if (titleEl) titleEl.textContent = this._config.title;
   }
 
   set hass(hass) {
@@ -810,15 +814,26 @@ class PaceDashboard extends HTMLElement {
             direction: ltr;
           }
           .header { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
-          .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); }
+          .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); cursor: pointer; transition: opacity 0.15s ease; }
+          .isp-name:hover { opacity: 0.8; }
+          .isp-name:active { opacity: 0.6; }
           .isp-name::before { content: '┃ '; color: var(--pace-accent-color, var(--ls-accent, #2b6fd9)); font-weight: 500; }
-          .server-name { font-size: 11px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #94a3b8); letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; min-width: 0; }
+          .server-name { font-size: 11px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #94a3b8); letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; min-width: 0; cursor: pointer; transition: opacity 0.15s ease; }
+          .server-name:hover { opacity: 0.8; }
+          .server-name:active { opacity: 0.6; }
           .server-name::before { content: attr(data-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .net-status { text-align: right; flex-shrink: 0; }
-          .net-state { display: inline-block; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); }
+          .net-state { display: inline-block; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); cursor: pointer; transition: background-color 0.15s ease; }
+          .net-state:hover { background: rgba(127, 127, 127, 0.15); }
+          .net-state:active { background: rgba(127, 127, 127, 0.3); }
           .net-state.online { color: var(--ls-success, #4ad19a); }
-          .net-ip { font-size: 10px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #64748b); margin-top: 2px; }
-          .heartbeat-strip { display: flex; justify-content: flex-end; gap: 1px; margin-top: 4px; }
+          .net-ip { font-size: 10px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: opacity 0.15s ease; }
+          .net-ip:hover { opacity: 0.8; }
+          .net-ip:active { opacity: 0.6; }
+          .net-link-row { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 4px; }
+          .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; cursor: pointer; transition: opacity 0.15s ease; }
+          .heartbeat-strip:hover { opacity: 0.8; }
+          .heartbeat-strip:active { opacity: 0.6; }
           .hb-bar { width: 3px; height: 10px; background: var(--divider-color, #2a3142); }
           .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
           .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
@@ -904,7 +919,11 @@ class PaceDashboard extends HTMLElement {
             width: 110px;
             height: 110px;
             flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
           }
+          .gauge:hover { transform: translateY(-2px); }
+          .gauge:active { transform: translateY(0) scale(0.97); }
 
           .gauge-svg {
             transform: rotate(135deg);
@@ -1037,7 +1056,9 @@ class PaceDashboard extends HTMLElement {
             border-top: 1px solid var(--divider-color, rgba(255,255,255,0.05));
             flex-shrink: 0;
           }
-          .last-test { font-size: 11px; color: var(--secondary-text-color, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+          .last-test { font-size: 11px; color: var(--secondary-text-color, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; cursor: pointer; transition: opacity 0.15s ease; }
+          .last-test:hover { opacity: 0.8; }
+          .last-test:active { opacity: 0.6; }
           .run-btn {
             padding: 6px 15px; border: 1px solid var(--pace-accent-color, var(--ls-accent, #2563eb)); border-radius: 0;
             background: transparent;
@@ -1148,13 +1169,15 @@ class PaceDashboard extends HTMLElement {
         <div class="card">
           <div class="header">
             <div class="isp-info">
-              <div class="isp-name">Pace</div>
+              <div class="isp-name">${this._config.title || 'PACE'}</div>
               <div class="server-name" data-text="-"></div>
             </div>
             <div class="net-status">
               <div class="net-state">OFFLINE</div>
-              <div class="net-ip"></div>
-              <div class="heartbeat-strip"></div>
+              <div class="net-link-row">
+                <span class="net-ip"></span>
+                <span class="heartbeat-strip"></span>
+              </div>
             </div>
           </div>
 
@@ -1302,8 +1325,17 @@ class PaceDashboard extends HTMLElement {
       '#m-dlc': this._resolve('dl_compliance', e.dl_compliance), '#m-ulc': this._resolve('ul_compliance', e.ul_compliance),
       '#m-datadl': this._resolve('data_downloaded', e.data_downloaded), '#m-dataul': this._resolve('data_uploaded', e.data_uploaded),
       '#m-lifedl': this._resolve('lifetime_download', e.lifetime_download), '#m-lifeul': this._resolve('lifetime_upload', e.lifetime_upload),
+      '.server-name': this._resolve('server', e.server),
+      '.net-state': this._resolve('internet_connected', e.internet_connected, 'binary_sensor'),
+      '.net-ip': this._resolve('public_ip', e.public_ip, 'sensor'),
+      '.heartbeat-strip': this._resolve('internet_connected', e.internet_connected, 'binary_sensor'),
+      '.last-test': this._resolve('last_test', e.last_test),
+      '.gauge-download': this._resolve('download', e.download),
+      '.gauge-upload': this._resolve('upload', e.upload),
       '#run': null
     };
+
+    this.shadowRoot.querySelector('.isp-name')?.addEventListener('click', () => navigateToPaceIntegration());
 
     Object.entries(clickMap).forEach(([id, ent]) => {
       const el = this.shadowRoot.querySelector(id);
@@ -1364,6 +1396,18 @@ class PaceDashboardEditor extends HTMLElement {
     const genDiv = document.createElement('div');
     genDiv.style.cssText = "border: 1px solid var(--divider-color, #444); border-radius: 8px; padding: 10px; background: var(--card-background-color, #222);";
     genDiv.innerHTML = `<div style="font-weight: bold; margin-bottom: 10px; color: var(--primary-color, #0ea5e9); font-size: 13px; text-transform: uppercase;">General Settings</div>`;
+
+    const titleOption = document.createElement('div');
+    titleOption.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
+    titleOption.innerHTML = `<label style="font-size: 12px; color: var(--secondary-text-color, #ccc);">Title</label>`;
+    const titleInput = document.createElement('input');
+    titleInput.type = "text";
+    titleInput.value = this._config.title ?? "PACE";
+    titleInput.placeholder = "PACE";
+    titleInput.style.cssText = "padding: 6px; border-radius: 4px; border: 1px solid var(--divider-color, #444); background: var(--card-background-color, #111); color: var(--primary-text-color, #fff); width: 100px;";
+    titleInput.addEventListener('change', (e) => this.configChanged({ ...this._config, title: e.target.value || 'PACE' }));
+    titleOption.appendChild(titleInput);
+    genDiv.appendChild(titleOption);
 
     const styleToggle = document.createElement('div');
     styleToggle.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
@@ -1537,9 +1581,9 @@ customElements.define("pace-dashboard-editor", PaceDashboardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "pace-dashboard",
-  name: "Pace - Dashboard",
+  name: "PACE - Dashboard",
   description: "Fully configurable dashboard with gauges, charts, and plan compliance",
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.0.8 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.1.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

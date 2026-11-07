@@ -21,8 +21,9 @@ Switch between backends at any time from the integration's options - **every sen
 - Optional ISP plan-compliance sensors (`% of your rated speed`)
 - Automatic or manual scheduling
 - Automatic vs. specific vs. custom server selection (backend-dependent)
+- Independent internet connectivity monitoring (online/offline + public IP), with a rolling connectivity heartbeat trend shown on the dashboard/minimal cards
 - Circuit breaker + repair flows for repeated failures or CLI download issues
-- 3 bundled Lovelace cards: full dashboard (with optional radial gauges and history charts), minimal, and compact/bubble
+- 3 bundled Lovelace cards: full dashboard (with optional radial gauges and history charts), minimal, and compact/bubble - each with a configurable title that links back to the integration's settings
 
 ## Screenshot
 
