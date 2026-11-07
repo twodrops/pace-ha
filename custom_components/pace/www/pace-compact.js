@@ -2,7 +2,7 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.1.0
+ * Version: 1.2.2
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -11,7 +11,7 @@
  * - Mobile-first, minimalist design
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.9';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.2.2';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -231,8 +231,8 @@ class PaceCompact extends HTMLElement {
         }
 
         .card {
-          background: var(--ha-card-background, var(--card-background-color, #1b2130));
-          border-radius: var(--ha-card-border-radius, 0px);
+          background: var(--ls-card, #181f2b);
+          border-radius: 0;
           padding: 4px 8px 4px 4px;
           color: var(--primary-text-color, #f8fafc);
           font-family: var(--primary-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
@@ -592,4 +592,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.1.0 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.2.2 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

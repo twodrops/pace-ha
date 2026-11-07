@@ -60,6 +60,20 @@ Independent of speed tests, PACE periodically checks basic internet reachability
 
 The Dashboard and Minimal Lovelace cards visualize that history as a small "LINK" bar strip - green bars for successful checks, red for failures - giving an at-a-glance trend instead of a single online/offline flag. It's a lightweight health signal (not a precise packet-loss measurement), since it's based on one check per interval rather than a burst of pings.
 
+## Dashboard Card Options
+
+These are set in the card's visual editor (or directly in its YAML), not through the integration's Settings dialog:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| **Title** | Text | `PACE` | Header text shown top-left; clicking it opens the integration's settings page |
+| **Terminal Style** | Toggle | On | Off reverts the card to a native HA card's look (colors, font, rounded corners) |
+| **Show Gauges** | Toggle | On | Show/hide the download/upload radial gauges |
+| **Show Charts** | Toggle | On | Show/hide the Throughput/Latency history charts |
+| **Show Plan & Usage** | Toggle | On | Show/hide the whole Plan Compliance + Data Usage section |
+| **Max Download/Upload (Mbps)** | Number | Auto | Overrides the gauges' scale; auto uses the ISP rated speed (+20%) if set, else 1000/500 |
+| **History (hours)** | Number | 168 (7 days) | How far back the charts' history query looks |
+
 ## Backend Selection Guide
 
 PACE supports three interchangeable CLI backends. All expose the exact same entities (download, upload, ping, jitter, server name, lifetime data, plan compliance, etc.) - only the underlying test engine and binary differ.

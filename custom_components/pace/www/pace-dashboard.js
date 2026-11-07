@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.1.2
+ * Version: 1.3.2
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.9';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.2.2';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -100,6 +100,7 @@ class PaceDashboard extends HTMLElement {
       },
       show_gauges: true,
       show_charts: true,
+      show_plan_usage: true,
       history_hours: 168,  // 7 days (24 * 7)
       terminal_style: true
     };
@@ -178,7 +179,8 @@ class PaceDashboard extends HTMLElement {
    * Adjust size based on enabled features
    */
   getCardSize() {
-    let size = 10; // Base size for metric cards and footer
+    let size = 8; // Base size for metric cards and footer
+    if (this._config.show_plan_usage !== false) size += 2;
     if (this._config.show_gauges) size += 3;
     if (this._config.show_charts) size += 8; // two live TRAFFIC.LIVE-style chart cards
     return size;
@@ -761,6 +763,9 @@ class PaceDashboard extends HTMLElement {
              fonts, card chrome, and typography instead of the terminal look. */
           :host([ha]) .card,
           :host([ha]) .server-name,
+          :host([ha]) .net-ip,
+          :host([ha]) .last-test,
+          :host([ha]) .section-title,
           :host([ha]) .run-btn {
             font-family: var(--ha-font-family-body, var(--paper-font-body1_-_font-family, Roboto, sans-serif));
           }
@@ -770,6 +775,7 @@ class PaceDashboard extends HTMLElement {
           }
           :host([ha]) .isp-name::before,
           :host([ha]) .chart-title::before,
+          :host([ha]) .section-title::before,
           :host([ha]) .metric .tk {
             display: none;
           }
@@ -789,14 +795,28 @@ class PaceDashboard extends HTMLElement {
           :host([ha]) .chart-foot,
           :host([ha]) .chart-legend,
           :host([ha]) .gauge-label,
+          :host([ha]) .section-title,
           :host([ha]) .chart-title {
             text-transform: none;
             letter-spacing: 0;
           }
+          :host([ha]) .section-title {
+            border-top: none;
+            font-weight: 500;
+          }
+          :host([ha]) .footer {
+            border-top: none;
+          }
+          :host([ha]) .header {
+            background: transparent;
+            border-bottom: none;
+            margin: 0 0 10px;
+            padding: 0;
+          }
 
           .card {
-            background: var(--ha-card-background, var(--card-background-color, #1b2130));
-            border-radius: var(--ha-card-border-radius, 0px);
+            background: var(--ls-card, #181f2b);
+            border-radius: 0;
             padding: 12px;
             padding-left: max(12px, env(safe-area-inset-left));
             padding-right: max(12px, env(safe-area-inset-right));
@@ -813,7 +833,7 @@ class PaceDashboard extends HTMLElement {
             flex: 1;
             direction: ltr;
           }
-          .header { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+          .header { margin: -12px -12px 10px -12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; background: var(--ls-head, #1d2330); border-bottom: 1px solid var(--divider-color, #2a3142); }
           .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); cursor: pointer; transition: opacity 0.15s ease; }
           .isp-name:hover { opacity: 0.8; }
           .isp-name:active { opacity: 0.6; }
@@ -837,6 +857,31 @@ class PaceDashboard extends HTMLElement {
           .hb-bar { width: 3px; height: 10px; background: var(--divider-color, #2a3142); }
           .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
           .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
+
+          /* FRITZ!Portal-style section header: small muted uppercase label
+             with a "-- " marker, below a full-bleed divider line that
+             separates it from the previous section's content. */
+          .section-title {
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ls-text2, #8390a3);
+            white-space: nowrap;
+            margin: 14px -12px 8px;
+            padding: 10px 12px 0;
+            border-top: 1px solid var(--divider-color, #2a3142);
+          }
+          .section-title:first-child { margin-top: 0; }
+          /* The header already ends in its own divider line (border-bottom),
+             so the first section-title right after it shouldn't add a
+             second one directly underneath. */
+          .header + .section-title {
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+          }
+          .section-title::before { content: '-- '; color: inherit; }
 
           .metrics-grid {
             display: grid;
@@ -893,8 +938,6 @@ class PaceDashboard extends HTMLElement {
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             margin-bottom: 10px;
-            border-top: 1px solid var(--divider-color, rgba(255,255,255,0.05));
-            padding-top: 10px;
             flex-shrink: 0;
           }
           .optional-grid .metric { padding: 8px 10px; gap: 3px; }
@@ -1052,7 +1095,8 @@ class PaceDashboard extends HTMLElement {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 10px;
+            margin: 0 -12px;
+            padding: 10px 12px 0;
             border-top: 1px solid var(--divider-color, rgba(255,255,255,0.05));
             flex-shrink: 0;
           }
@@ -1103,7 +1147,7 @@ class PaceDashboard extends HTMLElement {
             .metric { padding: 8px 10px; }
             .metric .label { font-size: 7px; letter-spacing: 0.3px; }
             .metric .value { font-size: 17px; }
-            .optional-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; padding-top: 10px; margin-bottom: 10px; }
+            .optional-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 10px; }
             .optional-grid .metric { padding: 6px 8px; }
             .optional-grid .metric .value { font-size: 12px; }
             .optional-grid .metric .label { font-size: 7px; }
@@ -1153,7 +1197,7 @@ class PaceDashboard extends HTMLElement {
             .card { padding: 8px; }
             .header { margin-bottom: 8px; }
             .metrics-grid { gap: 4px; margin-bottom: 8px; }
-            .optional-grid { gap: 3px; margin-bottom: 8px; padding-top: 8px; }
+            .optional-grid { gap: 3px; margin-bottom: 8px; }
             .gauges-container { margin: 8px 0; }
             .gauge { width: 80px; height: 80px; }
             .gauge-value { font-size: 16px; }
@@ -1181,6 +1225,7 @@ class PaceDashboard extends HTMLElement {
             </div>
           </div>
 
+          <div class="section-title">Speed.Test</div>
           <div class="metrics-grid">
             <div class="metric metric-dl${this._config.show_charts ? ' has-graph' : ''}" id="m-dl">
               ${this._config.show_charts ? cornerGlyphs : ''}
@@ -1207,6 +1252,8 @@ class PaceDashboard extends HTMLElement {
               ${this._config.show_charts ? '<div class="indicator indicator-chart"><svg viewBox="0 0 100 24" preserveAspectRatio="none"></svg></div>' : ''}
             </div>
           </div>
+        ${this._config.show_plan_usage !== false ? `
+        <div class="section-title">Plan.Usage</div>
         <div class="optional-grid" id="opt-grid">
           <div class="metric metric-dl-compliance" id="m-dlc">
             <div class="label">DL Plan</div>
@@ -1225,8 +1272,10 @@ class PaceDashboard extends HTMLElement {
           <div class="metric metric-lifetime-download" id="m-lifedl"><div class="label">Lifetime Down</div><div class="value-row"><span class="value"></span><span class="unit">GB</span></div></div>
           <div class="metric metric-lifetime-upload" id="m-lifeul"><div class="label">Lifetime Up</div><div class="value-row"><span class="value"></span><span class="unit">GB</span></div></div>
         </div>
+        ` : ''}
 
         ${this._config.show_gauges ? `
+        <div class="section-title">Gauges</div>
         <div class="gauges-container">
           <div class="gauge gauge-download">
             <svg class="gauge-svg" viewBox="0 0 200 200">
@@ -1255,6 +1304,7 @@ class PaceDashboard extends HTMLElement {
         ` : ''}
 
         ${this._config.show_charts ? `
+        <div class="section-title">Test.History</div>
         <div class="chart-card chart-card-traffic">
           <div class="chart-head">
             <div class="chart-title">THROUGHPUT</div>
@@ -1419,6 +1469,17 @@ class PaceDashboardEditor extends HTMLElement {
     terminalStyleCheckbox.addEventListener('change', (e) => this.configChanged({ ...this._config, terminal_style: e.target.checked }));
     styleToggle.appendChild(terminalStyleCheckbox);
     genDiv.appendChild(styleToggle);
+
+    const planUsageToggle = document.createElement('div');
+    planUsageToggle.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
+    planUsageToggle.innerHTML = `<label style="font-size: 12px; color: var(--secondary-text-color, #ccc);">Show Plan &amp; Usage</label>`;
+    const planUsageCheckbox = document.createElement('input');
+    planUsageCheckbox.type = "checkbox";
+    planUsageCheckbox.checked = this._config.show_plan_usage !== false;
+    planUsageCheckbox.style.cssText = "width: 20px; height: 20px; cursor: pointer;";
+    planUsageCheckbox.addEventListener('change', (e) => this.configChanged({ ...this._config, show_plan_usage: e.target.checked }));
+    planUsageToggle.appendChild(planUsageCheckbox);
+    genDiv.appendChild(planUsageToggle);
 
     const gaugesToggle = document.createElement('div');
     gaugesToggle.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
@@ -1586,4 +1647,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.1.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.3.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

@@ -14,7 +14,15 @@ const TERMINAL_PALETTE = {
     warning: '#c97b1a',
     danger: '#d24343',
     'border-hot': '#c0c8d4',
-    panel: '#eef1f6'
+    // Outer card vs. header-strip/tile background - exact FRITZ!Portal
+    // reference values (card is pure white, head/panel a soft grey).
+    card: '#ffffff',
+    head: '#eef1f5',
+    panel: '#eef1f6',
+    // Muted secondary text (section titles etc.) - FRITZ's own fixed grey,
+    // not HA's generic --secondary-text-color which can read too bright
+    // depending on the active theme.
+    text2: '#5a6678'
   },
   dark: {
     accent: '#5aa6ff',
@@ -26,7 +34,12 @@ const TERMINAL_PALETTE = {
     warning: '#ffb86c',
     danger: '#ff6b6b',
     'border-hot': '#3a4554',
-    panel: '#10141b'
+    // Exact FRITZ!Portal reference values - slightly greyish slate, not
+    // the near-black #1b2130/#10141b used before.
+    card: '#1a1f28',
+    head: '#1d2330',
+    panel: '#1d2330',
+    text2: '#8390a3'
   }
 };
 
@@ -42,10 +55,15 @@ const HA_STYLE_COLOR_MAP = {
   success: 'var(--success-color, #43a047)',
   warning: 'var(--warning-color, #ffa600)',
   danger: 'var(--error-color, #db4437)',
-  // A genuinely distinct surface color from the card's own background
-  // (not --ha-card-background itself), so panel boxes stay visible with
-  // real contrast in HA style mode, in both light and dark themes.
-  panel: 'var(--secondary-background-color, var(--card-background-color))'
+  // In HA style, the outer card, header strip, and tile panels all fully
+  // revert to the active HA theme's own card background (matching the
+  // FRITZ!Portal reference exactly) - tiles rely on their border for
+  // definition instead of a contrasting fill, so they don't look like an
+  // unrelated bright box dropped onto a native HA card.
+  card: 'var(--ha-card-background, var(--card-background-color))',
+  head: 'var(--ha-card-background, var(--card-background-color))',
+  panel: 'var(--ha-card-background, var(--card-background-color))',
+  text2: 'var(--secondary-text-color)'
 };
 
 /**

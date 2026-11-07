@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.1.3
+ * Version: 1.2.2
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.0.9';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.2.2';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -242,6 +242,7 @@ class PaceMinimal extends HTMLElement {
         /* "Terminal Style" (terminal_style: false): fall back to HA's own
            fonts, card chrome, and typography instead of the terminal look. */
         :host([ha]) .card,
+        :host([ha]) .link-row .ip-text,
         :host([ha]) .test-btn {
           font-family: var(--ha-font-family-body, var(--paper-font-body1_-_font-family, Roboto, sans-serif));
         }
@@ -263,8 +264,8 @@ class PaceMinimal extends HTMLElement {
         }
 
         .card {
-          background: var(--ha-card-background, var(--card-background-color, #1b2130));
-          border-radius: var(--ha-card-border-radius, 0px);
+          background: var(--ls-card, #181f2b);
+          border-radius: 0;
           padding: 20px;
           color: var(--primary-text-color, #f8fafc);
           font-family: ${TERMINAL_FONT_MONO};
@@ -653,4 +654,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.1.3 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.2.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

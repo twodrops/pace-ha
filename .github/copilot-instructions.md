@@ -49,3 +49,12 @@ card file itself.
   across `hass.states`. Keep each card's `ENTITY_SUFFIXES` map in sync with any new entity.
 - Run the Python test suite with
   `source .venv/bin/activate && python -m pytest tests/ -q` from the repo root.
+- Whenever you add or change a `config_flow.py` field (a new/renamed `CONF_*` option, its title,
+  or its description), update **both** `strings.json` and
+  `custom_components/pace/translations/en.json`, **and** add the same key(s) to every other
+  locale file under `custom_components/pace/translations/` (`de`, `es-MX`, `fr-CA`, `it`, `nl`,
+  `pl`, `pt-BR`, `ru`) — translated, not just copied in English. Missing a locale file means
+  non-English users silently fall back to English for that one field while everything else
+  around it is in their language, which reads as a bug. This does **not** apply to the Lovelace
+  cards' visual editors (`pace-*.js`) — their labels are plain hardcoded English JS strings with
+  no i18n system in this codebase, consistent with every existing editor field.
