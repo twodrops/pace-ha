@@ -61,13 +61,13 @@ async def test_button_extra_attributes_ready(
     assert state.attributes["waiting_in_queue"] is False
 
 
-async def test_button_unavailable_when_lock_held(
+async def test_button_stays_available_when_lock_held(
     hass: HomeAssistant,
     mock_config_entry_no_auto: MockConfigEntry,
     mock_native_client: AsyncMock,
     mock_store: AsyncMock,
 ) -> None:
-    """Test button becomes unavailable when global lock is held."""
+    """Test button stays available when global lock is held (no Logbook noise)."""
     await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
     await hass.async_block_till_done()
 
@@ -79,9 +79,32 @@ async def test_button_unavailable_when_lock_held(
         await hass.async_block_till_done()
 
         state = hass.states.get(BUTTON_ENTITY_ID)
-        assert state.state == "unavailable"
+        assert state.state != "unavailable"
     finally:
         coordinator.global_lock.release()
+
+
+async def test_button_press_ignored_when_waiting(
+    hass: HomeAssistant,
+    mock_config_entry_no_auto: MockConfigEntry,
+    mock_native_client: AsyncMock,
+    mock_store: AsyncMock,
+) -> None:
+    """Test button press is ignored when this instance is queued behind another."""
+    await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
+    await hass.async_block_till_done()
+
+    coordinator = mock_config_entry_no_auto.runtime_data.coordinator
+    coordinator.is_waiting = True
+    mock_native_client.run_speed_test.reset_mock()
+
+    await hass.services.async_call(
+        "button", "press",
+        {"entity_id": BUTTON_ENTITY_ID},
+        blocking=True,
+    )
+
+    mock_native_client.run_speed_test.assert_not_called()
 
 
 async def test_button_press_ignored_when_running(

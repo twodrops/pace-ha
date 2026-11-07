@@ -1,21 +1,21 @@
 {
-  "title": "Pace",
+  "title": "PACE",
   "config": {
     "step": {
       "custom_server": {
         "title": "Konfiguracja Niestandardowego Serwera",
-        "description": "Wprowadź URL twojego niestandardowego serwera Pace. Przykład: {example}",
+        "description": "Wprowadź URL twojego niestandardowego serwera PACE. Przykład: {example}",
         "data": {
           "custom_server": "URL Serwera",
           "skip_cert_verify": "Zezwalaj na wygasłe lub samopodpisane certyfikaty SSL"
         },
         "data_description": {
-          "custom_server": "Pełny URL do twojego serwera Pace (musi być HTTPS chyba że weryfikacja certyfikatu jest wyłączona)",
+          "custom_server": "Pełny URL do twojego serwera PACE (musi być HTTPS chyba że weryfikacja certyfikatu jest wyłączona)",
           "skip_cert_verify": "Włącz to jeśli twój serwer używa certyfikatu samopodpisanego lub masz problemy z SSL"
         }
       },
       "user": {
-        "title": "Konfiguracja Pace",
+        "title": "Konfiguracja PACE",
         "description": "Wybierz, którego backendu CLI do testu prędkości użyć. Opcje serwera w następnym kroku zależą od tego wyboru.",
         "data": {
           "backend_type": "Backend"
@@ -26,7 +26,7 @@
       },
       "server": {
         "title": "Serwer i ustawienia testu",
-        "description": "Skonfiguruj Pace do testowania prędkości sieci. Ta integracja będzie monitorować prędkość Twojego połączenia internetowego w regularnych odstępach czasu.",
+        "description": "Skonfiguruj PACE do testowania prędkości sieci. Ta integracja będzie monitorować prędkość Twojego połączenia internetowego w regularnych odstępach czasu.",
         "data": {
           "server_selection": "Wybór serwera",
           "custom_server": "Niestandardowy adres URL serwera",
@@ -59,7 +59,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Nie można połączyć z serwerem Pace",
+      "cannot_connect": "Nie można połączyć z serwerem PACE",
       "invalid_server": "Nieprawidłowy wybór serwera",
       "custom_server_required": "Wymagany jest niestandardowy URL serwera",
       "invalid_url": "Nieprawidłowy format URL",
@@ -71,8 +71,8 @@
       "server_id_requires_librespeed": "Konkretne ID serwera jest prawidłowe tylko dla backendu LibreSpeed. Wybierz 'Automatyczny' lub przełącz z powrotem na LibreSpeed."
     },
     "abort": {
-      "already_configured": "Pace jest już skonfigurowany",
-      "cannot_download_cli": "Nie udało się pobrać Pace CLI",
+      "already_configured": "PACE jest już skonfigurowany",
+      "cannot_download_cli": "Nie udało się pobrać PACE CLI",
       "unsupported_platform": "Platforma nieobsługiwana dla backendu CLI"
     }
   },
@@ -80,14 +80,14 @@
     "step": {
       "custom_server": {
         "title": "Konfiguracja Niestandardowego Serwera",
-        "description": "Skonfiguruj swój niestandardowy serwer Pace. Przykład: {example}",
+        "description": "Skonfiguruj swój niestandardowy serwer PACE. Przykład: {example}",
         "data": {
           "custom_server": "URL Serwera",
           "skip_cert_verify": "Zezwalaj na wygasłe lub samopodpisane certyfikaty SSL"
         }
       },
       "init": {
-        "title": "Opcje Pace",
+        "title": "Opcje PACE",
         "description": "Wybierz, którego backendu CLI do testu prędkości użyć. Opcje serwera w następnym kroku zależą od tego wyboru.",
         "data": {
           "backend_type": "Backend"
@@ -98,7 +98,7 @@
       },
       "server": {
         "title": "Serwer i ustawienia testu",
-        "description": "Zmień ustawienia Pace. Zmiany będą miały zastosowanie przy następnym teście prędkości.",
+        "description": "Zmień ustawienia PACE. Zmiany będą miały zastosowanie przy następnym teście prędkości.",
         "data": {
           "server_selection": "Wybór serwera",
           "custom_server": "Niestandardowy adres URL serwera",
@@ -196,18 +196,22 @@
     },
     "binary_sensor": {
       "running": {
-        "name": "Test Prędkości Uruchomiony"
+        "name": "Test Prędkości Uruchomiony",
+        "state": {
+          "on": "Test w toku",
+          "off": "Brak aktywnego testu"
+        }
       }
     }
   },
   "services": {
     "run_speed_test": {
       "name": "Uruchom Test Prędkości",
-      "description": "Ręcznie uruchom test prędkości na określonej instancji Pace",
+      "description": "Ręcznie uruchom test prędkości na określonej instancji PACE",
       "fields": {
         "entry_id": {
           "name": "Wpis Konfiguracji",
-          "description": "Instancja Pace na której uruchomić test (opcjonalnie, używa pierwszej instancji jeśli nie określono)"
+          "description": "Instancja PACE na której uruchomić test (opcjonalnie, używa pierwszej instancji jeśli nie określono)"
         },
         "server_id": {
           "name": "ID Serwera",
@@ -222,7 +226,7 @@
     "server_not_found": "Serwer nie znaleziony",
     "network_error": "Błąd sieci: {error}",
     "timeout_error": "Test prędkości przekroczył limit czasu po {timeout} sekundach",
-    "cli_not_available": "Pace CLI niedostępny",
+    "cli_not_available": "PACE CLI niedostępny",
     "cli_download_failed": "Nie udało się pobrać pliku binarnego CLI",
     "invalid_configuration": "Nieprawidłowa konfiguracja",
     "circuit_breaker_open": "Zbyt wiele kolejnych błędów, wyłącznik automatyczny otwarty",
@@ -231,19 +235,19 @@
   },
   "issues": {
     "cli_download_failed": {
-      "title": "Pobieranie Pace CLI Nie Powiodło Się",
-      "description": "Plik binarny Pace CLI nie mógł zostać pobrany automatycznie. Może to być spowodowane problemami z połączeniem sieciowym lub ograniczeniami zapory sieciowej.\n\nMożesz:\n• Spróbować pobrać ponownie używając przepływu naprawczego\n• Przełączyć się na inny backend w opcjach\n• Sprawdzić swoje połączenie internetowe"
+      "title": "Pobieranie PACE CLI Nie Powiodło Się",
+      "description": "Plik binarny PACE CLI nie mógł zostać pobrany automatycznie. Może to być spowodowane problemami z połączeniem sieciowym lub ograniczeniami zapory sieciowej.\n\nMożesz:\n• Spróbować pobrać ponownie używając przepływu naprawczego\n• Przełączyć się na inny backend w opcjach\n• Sprawdzić swoje połączenie internetowe"
     },
     "custom_server_unreachable": {
-      "title": "Niestandardowy Serwer Pace Nieosiągalny",
-      "description": "Twój niestandardowy serwer Pace pod {server_url} jest obecnie nieosiągalny. Może to być spowodowane:\n\n• Serwer jest tymczasowo wyłączony\n• Problemy z połączeniem sieciowym\n• Nieprawidłowy URL serwera\n• Problemy z certyfikatem SSL\n\nAby rozwiązać ten problem, przejdź do {options_path} i:\n• Zaktualizuj URL serwera\n• Sprawdź ustawienia certyfikatu SSL\n• Przełącz się na automatyczny wybór serwera"
+      "title": "Niestandardowy Serwer PACE Nieosiągalny",
+      "description": "Twój niestandardowy serwer PACE pod {server_url} jest obecnie nieosiągalny. Może to być spowodowane:\n\n• Serwer jest tymczasowo wyłączony\n• Problemy z połączeniem sieciowym\n• Nieprawidłowy URL serwera\n• Problemy z certyfikatem SSL\n\nAby rozwiązać ten problem, przejdź do {options_path} i:\n• Zaktualizuj URL serwera\n• Sprawdź ustawienia certyfikatu SSL\n• Przełącz się na automatyczny wybór serwera"
     },
     "repeated_test_failures": {
-      "title": "Testy Pace Wielokrotnie Zawodzą",
+      "title": "Testy PACE Wielokrotnie Zawodzą",
       "description": "Testy prędkości zawiodły {failure_count} razy z rzędu. To może wskazywać na:\n\n• Problemy z połączeniem sieciowym\n• Problemy z kompatybilnością serwera\n• Problemy z wydajnością backendu\n\nZalecane rozwiązania:\n• {backend_switch}\n• Spróbuj automatycznego wyboru serwera\n• Sprawdź swoje połączenie internetowe\n• Przejrzyj logi Home Assistant dla szczegółów"
     },
     "circuit_breaker_open": {
-      "title": "Wyłącznik Automatyczny Pace Aktywowany",
+      "title": "Wyłącznik Automatyczny PACE Aktywowany",
       "description": "Testy prędkości zostały tymczasowo wyłączone po {failure_count} kolejnych błędach aby zapobiec przeciążeniu systemu.\n\n{manual_test}\n\nAby rozwiązać:\n• Sprawdź swoje połączenie sieciowe\n• Zweryfikuj dostępność serwera\n• Przejrzyj logi błędów dla konkretnych problemów\n• Rozważ zmianę backendu"
     }
   },

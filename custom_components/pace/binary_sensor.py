@@ -72,31 +72,15 @@ class PaceRunningSensor(PaceBaseEntity, BinarySensorEntity):
     def is_on(self) -> bool:
         """Return true if any speed test is running globally.
 
-        We primarily rely on the global lock state, but also check our
-        instance's waiting state to show activity during queue waiting.
-
-        Note: We don't check is_running alone as it may be out of sync
-        with the lock during transitions. The lock is the authoritative
-        source for "any test running globally".
+        The lock is the sole authoritative source for "a test is running
+        somewhere": whenever this instance is merely waiting in queue for
+        its turn, the lock is already held (by whoever it's waiting on), so
+        checking `is_waiting` separately would be redundant - it would also
+        misrepresent a queued-but-not-yet-started instance as "running".
         """
-        # Check if any instance holds the global lock
-        global_lock = self.coordinator.global_lock
-        global_lock_held = global_lock.locked()
-
-        # Also show as "on" if we're waiting for the lock
-        # This provides better UX by showing activity during wait
-        is_waiting = self.coordinator.is_waiting
-
-        # Return true if test is running or waiting
-        is_any_running = global_lock_held or is_waiting
-
-        _LOGGER.debug(
-            "Binary sensor: global_lock=%s, waiting=%s, result=%s",
-            global_lock_held,
-            is_waiting,
-            is_any_running,
-        )
-        return is_any_running
+        global_lock_held = self.coordinator.global_lock.locked()
+        _LOGGER.debug("Binary sensor: global_lock=%s", global_lock_held)
+        return global_lock_held
 
     @property
     def icon(self) -> str:

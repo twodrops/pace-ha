@@ -138,7 +138,7 @@ async def test_user_flow_automatic_server(
         result["flow_id"], _server_payload("automatic")
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "Pace (Automatic)"
+    assert result["title"] == "PACE (Automatic)"
     assert result["data"][CONF_SERVER_ID] is None
     assert result["data"][CONF_CUSTOM_SERVER] is None
 

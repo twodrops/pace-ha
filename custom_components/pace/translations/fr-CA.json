@@ -1,21 +1,21 @@
 {
-  "title": "Pace",
+  "title": "PACE",
   "config": {
     "step": {
       "custom_server": {
         "title": "Configuration du Serveur Personnalisé",
-        "description": "Entrez l'URL de votre serveur Pace personnalisé. Exemple : {example}",
+        "description": "Entrez l'URL de votre serveur PACE personnalisé. Exemple : {example}",
         "data": {
           "custom_server": "URL du Serveur",
           "skip_cert_verify": "Autoriser les certificats SSL expirés ou auto-signés"
         },
         "data_description": {
-          "custom_server": "URL complète de votre serveur Pace (doit être HTTPS sauf si la vérification du certificat est désactivée)",
+          "custom_server": "URL complète de votre serveur PACE (doit être HTTPS sauf si la vérification du certificat est désactivée)",
           "skip_cert_verify": "Activez ceci si votre serveur utilise un certificat auto-signé ou si vous avez des problèmes SSL"
         }
       },
       "user": {
-        "title": "Configurer Pace",
+        "title": "Configurer PACE",
         "description": "Choisissez le backend de test de vitesse CLI à utiliser. Les options de serveur de l'étape suivante dépendent de ce choix.",
         "data": {
           "backend_type": "Backend"
@@ -26,7 +26,7 @@
       },
       "server": {
         "title": "Serveur et paramètres de test",
-        "description": "Configurez Pace pour les tests de vitesse réseau. Cette intégration surveillera la vitesse de votre connexion Internet à intervalles réguliers.",
+        "description": "Configurez PACE pour les tests de vitesse réseau. Cette intégration surveillera la vitesse de votre connexion Internet à intervalles réguliers.",
         "data": {
           "server_selection": "Sélection du serveur",
           "custom_server": "URL de serveur personnalisé",
@@ -59,7 +59,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Impossible de se connecter au serveur Pace",
+      "cannot_connect": "Impossible de se connecter au serveur PACE",
       "invalid_server": "Sélection de serveur invalide",
       "custom_server_required": "L'URL du serveur personnalisé est requise",
       "invalid_url": "Format d'URL invalide",
@@ -71,8 +71,8 @@
       "server_id_requires_librespeed": "Un ID de serveur spécifique n'est valide que pour le backend LibreSpeed. Choisissez 'Automatique' ou revenez à LibreSpeed."
     },
     "abort": {
-      "already_configured": "Pace est déjà configuré",
-      "cannot_download_cli": "Impossible de télécharger le CLI Pace",
+      "already_configured": "PACE est déjà configuré",
+      "cannot_download_cli": "Impossible de télécharger le CLI PACE",
       "unsupported_platform": "Plateforme non prise en charge pour le backend CLI"
     }
   },
@@ -80,14 +80,14 @@
     "step": {
       "custom_server": {
         "title": "Configuration du Serveur Personnalisé",
-        "description": "Configurez votre serveur Pace personnalisé. Exemple : {example}",
+        "description": "Configurez votre serveur PACE personnalisé. Exemple : {example}",
         "data": {
           "custom_server": "URL du Serveur",
           "skip_cert_verify": "Autoriser les certificats SSL expirés ou auto-signés"
         }
       },
       "init": {
-        "title": "Options de Pace",
+        "title": "Options de PACE",
         "description": "Choisissez le backend de test de vitesse CLI à utiliser. Les options de serveur de l'étape suivante dépendent de ce choix.",
         "data": {
           "backend_type": "Backend"
@@ -98,7 +98,7 @@
       },
       "server": {
         "title": "Serveur et paramètres de test",
-        "description": "Modifiez les paramètres de Pace. Les changements prendront effet au prochain test de vitesse.",
+        "description": "Modifiez les paramètres de PACE. Les changements prendront effet au prochain test de vitesse.",
         "data": {
           "server_selection": "Sélection du serveur",
           "custom_server": "URL de serveur personnalisé",
@@ -196,18 +196,22 @@
     },
     "binary_sensor": {
       "running": {
-        "name": "Test de Vitesse en Cours"
+        "name": "Test de Vitesse en Cours",
+        "state": {
+          "on": "Test en cours",
+          "off": "Aucun test actif"
+        }
       }
     }
   },
   "services": {
     "run_speed_test": {
       "name": "Exécuter le Test de Vitesse",
-      "description": "Déclencher manuellement un test de vitesse sur une instance Pace spécifique",
+      "description": "Déclencher manuellement un test de vitesse sur une instance PACE spécifique",
       "fields": {
         "entry_id": {
           "name": "Entrée de Configuration",
-          "description": "L'instance Pace sur laquelle exécuter le test (optionnel, utilise la première instance si non spécifié)"
+          "description": "L'instance PACE sur laquelle exécuter le test (optionnel, utilise la première instance si non spécifié)"
         },
         "server_id": {
           "name": "ID du Serveur",
@@ -230,7 +234,7 @@
     "server_not_found": "Serveur introuvable",
     "network_error": "Erreur réseau : {error}",
     "timeout_error": "Test de vitesse expiré après {timeout} secondes",
-    "cli_not_available": "Pace CLI n'est pas disponible",
+    "cli_not_available": "PACE CLI n'est pas disponible",
     "cli_download_failed": "Échec du téléchargement du binaire CLI",
     "invalid_configuration": "Configuration invalide",
     "circuit_breaker_open": "Trop d'échecs consécutifs, le disjoncteur est ouvert",
@@ -239,19 +243,19 @@
   },
   "issues": {
     "cli_download_failed": {
-      "title": "Échec du Téléchargement de Pace CLI",
-      "description": "Le binaire Pace CLI n'a pas pu être téléchargé automatiquement. Cela peut être dû à des problèmes de connectivité réseau ou des restrictions de pare-feu.\n\nVous pouvez :\n• Réessayer le téléchargement en utilisant le flux de réparation\n• Passer à un autre backend dans les options\n• Vérifier votre connexion Internet"
+      "title": "Échec du Téléchargement de PACE CLI",
+      "description": "Le binaire PACE CLI n'a pas pu être téléchargé automatiquement. Cela peut être dû à des problèmes de connectivité réseau ou des restrictions de pare-feu.\n\nVous pouvez :\n• Réessayer le téléchargement en utilisant le flux de réparation\n• Passer à un autre backend dans les options\n• Vérifier votre connexion Internet"
     },
     "custom_server_unreachable": {
-      "title": "Serveur Pace Personnalisé Inaccessible",
-      "description": "Votre serveur Pace personnalisé à {server_url} est actuellement inaccessible. Cela pourrait être dû à :\n\n• Le serveur est temporairement hors ligne\n• Problèmes de connectivité réseau\n• URL du serveur incorrecte\n• Problèmes de certificat SSL\n\nPour résoudre ce problème, allez à {options_path} et :\n• Mettez à jour l'URL du serveur\n• Vérifiez les paramètres du certificat SSL\n• Passez à la sélection automatique du serveur"
+      "title": "Serveur PACE Personnalisé Inaccessible",
+      "description": "Votre serveur PACE personnalisé à {server_url} est actuellement inaccessible. Cela pourrait être dû à :\n\n• Le serveur est temporairement hors ligne\n• Problèmes de connectivité réseau\n• URL du serveur incorrecte\n• Problèmes de certificat SSL\n\nPour résoudre ce problème, allez à {options_path} et :\n• Mettez à jour l'URL du serveur\n• Vérifiez les paramètres du certificat SSL\n• Passez à la sélection automatique du serveur"
     },
     "repeated_test_failures": {
-      "title": "Échecs Répétés des Tests Pace",
+      "title": "Échecs Répétés des Tests PACE",
       "description": "Les tests de vitesse ont échoué {failure_count} fois de suite. Cela peut indiquer :\n\n• Problèmes de connectivité réseau\n• Problèmes de compatibilité du serveur\n• Problèmes de performance du backend\n\nSolutions recommandées :\n• {backend_switch}\n• Essayez la sélection automatique du serveur\n• Vérifiez votre connexion Internet\n• Consultez les journaux Home Assistant pour plus de détails"
     },
     "circuit_breaker_open": {
-      "title": "Disjoncteur Pace Activé",
+      "title": "Disjoncteur PACE Activé",
       "description": "Les tests de vitesse ont été temporairement désactivés après {failure_count} échecs consécutifs pour éviter la surcharge du système.\n\n{manual_test}\n\nPour résoudre :\n• Vérifiez votre connexion réseau\n• Vérifiez la disponibilité du serveur\n• Consultez les journaux d'erreur pour des problèmes spécifiques\n• Envisagez de changer de backend"
     }
   }

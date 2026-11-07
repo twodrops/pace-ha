@@ -47,17 +47,23 @@ class PaceButton(PaceBaseEntity, ButtonEntity):
 
     @property
     def available(self) -> bool:
-        """Return if entity is available."""
-        return (
-            not self.coordinator.global_lock.locked()
-            and not self.coordinator.is_waiting
-        )
+        """Return if entity is available.
+
+        Always available (not tied to lock state or last test's
+        success/failure) so the button never Unavailable/Available-toggles
+        in the Logbook; a press is simply a no-op if already busy.
+        """
+        return True
 
     async def async_press(self) -> None:
-        """Handle the button press."""
+        """Handle the button press.
+
+        A press while this instance is already running or queued is simply
+        a silent no-op instead of the button going Unavailable.
+        """
         _LOGGER.info("Manual speed test button pressed")
-        if self.coordinator.is_running:
-            _LOGGER.warning("Speed test already in progress, ignoring button press")
+        if self.coordinator.is_running or self.coordinator.is_waiting:
+            _LOGGER.debug("Speed test already in progress or queued, ignoring button press")
             return
         await self.coordinator.async_refresh()
 

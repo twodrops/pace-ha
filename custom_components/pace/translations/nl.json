@@ -1,21 +1,21 @@
 {
-  "title": "Pace",
+  "title": "PACE",
   "config": {
     "step": {
       "custom_server": {
         "title": "Aangepaste Serverconfiguratie",
-        "description": "Voer de URL van uw aangepaste Pace-server in. Voorbeeld: {example}",
+        "description": "Voer de URL van uw aangepaste PACE-server in. Voorbeeld: {example}",
         "data": {
           "custom_server": "Server URL",
           "skip_cert_verify": "Verlopen of zelfondertekende SSL-certificaten toestaan"
         },
         "data_description": {
-          "custom_server": "Volledige URL naar uw Pace-server (moet HTTPS zijn tenzij certificaatverificatie is uitgeschakeld)",
+          "custom_server": "Volledige URL naar uw PACE-server (moet HTTPS zijn tenzij certificaatverificatie is uitgeschakeld)",
           "skip_cert_verify": "Schakel dit in als uw server een zelfondertekend certificaat gebruikt of als u SSL-problemen heeft"
         }
       },
       "user": {
-        "title": "Pace configureren",
+        "title": "PACE configureren",
         "description": "Kies welke CLI-snelheidstest backend u wilt gebruiken. De serveropties in de volgende stap zijn afhankelijk van deze keuze.",
         "data": {
           "backend_type": "Backend"
@@ -26,7 +26,7 @@
       },
       "server": {
         "title": "Server- en testinstellingen",
-        "description": "Stel Pace in voor netwerksnelheidstests. Deze integratie bewaakt uw internetverbindingssnelheid met regelmatige tussenpozen.",
+        "description": "Stel PACE in voor netwerksnelheidstests. Deze integratie bewaakt uw internetverbindingssnelheid met regelmatige tussenpozen.",
         "data": {
           "server_selection": "Serverselectie",
           "custom_server": "Aangepaste server-URL",
@@ -59,7 +59,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Kan geen verbinding maken met Pace-server",
+      "cannot_connect": "Kan geen verbinding maken met PACE-server",
       "invalid_server": "Ongeldige serverselectie",
       "custom_server_required": "Aangepaste server URL is vereist",
       "invalid_url": "Ongeldig URL-formaat",
@@ -71,8 +71,8 @@
       "server_id_requires_librespeed": "Een specifieke server-ID is alleen geldig voor de LibreSpeed-backend. Kies 'Automatisch' of schakel terug naar LibreSpeed."
     },
     "abort": {
-      "already_configured": "Pace is al geconfigureerd",
-      "cannot_download_cli": "Kan Pace CLI niet downloaden",
+      "already_configured": "PACE is al geconfigureerd",
+      "cannot_download_cli": "Kan PACE CLI niet downloaden",
       "unsupported_platform": "Platform niet ondersteund voor CLI-backend"
     }
   },
@@ -80,14 +80,14 @@
     "step": {
       "custom_server": {
         "title": "Aangepaste Serverconfiguratie",
-        "description": "Configureer uw aangepaste Pace-server. Voorbeeld: {example}",
+        "description": "Configureer uw aangepaste PACE-server. Voorbeeld: {example}",
         "data": {
           "custom_server": "Server URL",
           "skip_cert_verify": "Verlopen of zelfondertekende SSL-certificaten toestaan"
         }
       },
       "init": {
-        "title": "Pace-opties",
+        "title": "PACE-opties",
         "description": "Kies welke CLI-snelheidstest backend u wilt gebruiken. De serveropties in de volgende stap zijn afhankelijk van deze keuze.",
         "data": {
           "backend_type": "Backend"
@@ -98,7 +98,7 @@
       },
       "server": {
         "title": "Server- en testinstellingen",
-        "description": "Wijzig Pace-instellingen. Wijzigingen worden van kracht bij de volgende snelheidstest.",
+        "description": "Wijzig PACE-instellingen. Wijzigingen worden van kracht bij de volgende snelheidstest.",
         "data": {
           "server_selection": "Serverselectie",
           "custom_server": "Aangepaste server-URL",
@@ -196,18 +196,22 @@
     },
     "binary_sensor": {
       "running": {
-        "name": "Snelheidstest Actief"
+        "name": "Snelheidstest Actief",
+        "state": {
+          "on": "Test wordt uitgevoerd",
+          "off": "Geen test actief"
+        }
       }
     }
   },
   "services": {
     "run_speed_test": {
       "name": "Snelheidstest Uitvoeren",
-      "description": "Handmatig een snelheidstest activeren op een specifieke Pace-instantie",
+      "description": "Handmatig een snelheidstest activeren op een specifieke PACE-instantie",
       "fields": {
         "entry_id": {
           "name": "Configuratie-invoer",
-          "description": "De Pace-instantie om de test op uit te voeren (optioneel, gebruikt eerste instantie indien niet opgegeven)"
+          "description": "De PACE-instantie om de test op uit te voeren (optioneel, gebruikt eerste instantie indien niet opgegeven)"
         },
         "server_id": {
           "name": "Server ID",
@@ -222,7 +226,7 @@
     "server_not_found": "Server niet gevonden",
     "network_error": "Netwerkfout: {error}",
     "timeout_error": "Snelheidstest time-out na {timeout} seconden",
-    "cli_not_available": "Pace CLI is niet beschikbaar",
+    "cli_not_available": "PACE CLI is niet beschikbaar",
     "cli_download_failed": "Kan CLI-binair niet downloaden",
     "invalid_configuration": "Ongeldige configuratie",
     "circuit_breaker_open": "Te veel opeenvolgende fouten, stroomonderbreker is open",
@@ -231,19 +235,19 @@
   },
   "issues": {
     "cli_download_failed": {
-      "title": "Pace CLI Download Mislukt",
-      "description": "Het Pace CLI-binair kon niet automatisch worden gedownload. Dit kan komen door netwerkverbindingsproblemen of firewallbeperkingen.\n\nU kunt:\n• Opnieuw proberen te downloaden via de reparatiestroom\n• Overschakelen naar een andere backend in de opties\n• Uw internetverbinding controleren"
+      "title": "PACE CLI Download Mislukt",
+      "description": "Het PACE CLI-binair kon niet automatisch worden gedownload. Dit kan komen door netwerkverbindingsproblemen of firewallbeperkingen.\n\nU kunt:\n• Opnieuw proberen te downloaden via de reparatiestroom\n• Overschakelen naar een andere backend in de opties\n• Uw internetverbinding controleren"
     },
     "custom_server_unreachable": {
-      "title": "Aangepaste Pace-server Onbereikbaar",
-      "description": "Uw aangepaste Pace-server op {server_url} is momenteel onbereikbaar. Dit kan zijn door:\n\n• Server is tijdelijk offline\n• Netwerkverbindingsproblemen\n• Onjuiste server-URL\n• SSL-certificaatproblemen\n\nOm dit probleem op te lossen, ga naar {options_path} en:\n• Werk de server-URL bij\n• Controleer SSL-certificaatinstellingen\n• Schakel over naar automatische serverselectie"
+      "title": "Aangepaste PACE-server Onbereikbaar",
+      "description": "Uw aangepaste PACE-server op {server_url} is momenteel onbereikbaar. Dit kan zijn door:\n\n• Server is tijdelijk offline\n• Netwerkverbindingsproblemen\n• Onjuiste server-URL\n• SSL-certificaatproblemen\n\nOm dit probleem op te lossen, ga naar {options_path} en:\n• Werk de server-URL bij\n• Controleer SSL-certificaatinstellingen\n• Schakel over naar automatische serverselectie"
     },
     "repeated_test_failures": {
-      "title": "Pace-testen Falen Herhaaldelijk",
+      "title": "PACE-testen Falen Herhaaldelijk",
       "description": "Snelheidstesten zijn {failure_count} keer achter elkaar mislukt. Dit kan wijzen op:\n\n• Netwerkverbindingsproblemen\n• Servercompatibiliteitsproblemen\n• Backend-prestatieproblemen\n\nAanbevolen oplossingen:\n• {backend_switch}\n• Probeer automatische serverselectie\n• Controleer uw internetverbinding\n• Bekijk Home Assistant-logs voor details"
     },
     "circuit_breaker_open": {
-      "title": "Pace Stroomonderbreker Geactiveerd",
+      "title": "PACE Stroomonderbreker Geactiveerd",
       "description": "Snelheidstesten zijn tijdelijk uitgeschakeld na {failure_count} opeenvolgende fouten om systeemoverbelasting te voorkomen.\n\n{manual_test}\n\nOm op te lossen:\n• Controleer uw netwerkverbinding\n• Verifieer serverbeschikbaarheid\n• Bekijk foutenlogboeken voor specifieke problemen\n• Overweeg van backend te wisselen"
     }
   },

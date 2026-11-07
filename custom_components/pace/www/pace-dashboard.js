@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.3.2
+ * Version: 1.3.4
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.2.2';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.4';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -833,15 +833,16 @@ class PaceDashboard extends HTMLElement {
             flex: 1;
             direction: ltr;
           }
-          .header { margin: -12px -12px 10px -12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; background: var(--ls-head, #1d2330); border-bottom: 1px solid var(--divider-color, #2a3142); }
-          .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); cursor: pointer; transition: opacity 0.15s ease; }
+          .header { margin: -12px -12px 10px -12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-shrink: 0; background: var(--ls-head, #1d2330); border-bottom: 1px solid var(--divider-color, #2a3142); }
+          .isp-info { min-width: 0; overflow: hidden; }
+          .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); cursor: pointer; transition: opacity 0.15s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .isp-name:hover { opacity: 0.8; }
           .isp-name:active { opacity: 0.6; }
           .isp-name::before { content: '┃ '; color: var(--pace-accent-color, var(--ls-accent, #2b6fd9)); font-weight: 500; }
           .server-name { font-size: 11px; font-family: ${TERMINAL_FONT_MONO}; color: var(--secondary-text-color, #94a3b8); letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; min-width: 0; cursor: pointer; transition: opacity 0.15s ease; }
           .server-name:hover { opacity: 0.8; }
           .server-name:active { opacity: 0.6; }
-          .server-name::before { content: attr(data-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .server-name::before { content: attr(data-text); display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .net-status { text-align: right; flex-shrink: 0; }
           .net-state { display: inline-block; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ls-danger, #ff6b6b); cursor: pointer; transition: background-color 0.15s ease; }
           .net-state:hover { background: rgba(127, 127, 127, 0.15); }
@@ -881,7 +882,7 @@ class PaceDashboard extends HTMLElement {
             margin-top: 0;
             padding-top: 0;
           }
-          .section-title::before { content: '-- '; color: inherit; }
+          .section-title::before { content: '── '; color: inherit; }
 
           .metrics-grid {
             display: grid;
@@ -1647,4 +1648,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.3.2 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.3.4 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

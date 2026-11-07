@@ -1,9 +1,9 @@
 {
-  "title": "Pace",
+  "title": "PACE",
   "config": {
     "step": {
       "user": {
-        "title": "Configure Pace",
+        "title": "Configure PACE",
         "description": "Choose which CLI speed test backend to use. The next step's server options depend on this choice.",
         "data": {
           "backend_type": "Backend"
@@ -14,7 +14,7 @@
       },
       "server": {
         "title": "Server & Test Settings",
-        "description": "Set up Pace for network speed testing. This integration will monitor your internet connection speed at regular intervals.",
+        "description": "Set up PACE for network speed testing. This integration will monitor your internet connection speed at regular intervals.",
         "data": {
           "server_selection": "Server Selection",
           "custom_server": "Custom Server URL",
@@ -72,7 +72,7 @@
       "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "Pace is already configured",
+      "already_configured": "PACE is already configured",
       "cannot_download_cli": "Failed to download the CLI binary",
       "unsupported_platform": "Platform not supported for this backend"
     }
@@ -80,7 +80,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "Pace Options",
+        "title": "PACE Options",
         "description": "Choose which CLI speed test backend to use. The next step's server options depend on this choice.",
         "data": {
           "backend_type": "Backend"
@@ -91,7 +91,7 @@
       },
       "server": {
         "title": "Server & Test Settings",
-        "description": "Modify Pace settings. Changes will take effect on the next speed test.",
+        "description": "Modify PACE settings. Changes will take effect on the next speed test.",
         "data": {
           "server_selection": "Server Selection",
           "custom_server": "Custom Server URL",
@@ -198,7 +198,11 @@
     },
     "binary_sensor": {
       "running": {
-        "name": "Speed Test Running"
+        "name": "Speed Test Running",
+        "state": {
+          "on": "Test running",
+          "off": "No test active"
+        }
       },
       "internet_connected": {
         "name": "Internet Connected"
@@ -208,11 +212,11 @@
   "services": {
     "run_speed_test": {
       "name": "Run Speed Test",
-      "description": "Manually trigger a speed test on a specific Pace instance",
+      "description": "Manually trigger a speed test on a specific PACE instance",
       "fields": {
         "entry_id": {
           "name": "Configuration Entry",
-          "description": "The Pace instance to run the test on (optional, uses first instance if not specified)"
+          "description": "The PACE instance to run the test on (optional, uses first instance if not specified)"
         },
         "server_id": {
           "name": "Server ID",

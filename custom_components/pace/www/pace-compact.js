@@ -2,7 +2,7 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.2.2
+ * Version: 1.3.4
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -11,7 +11,7 @@
  * - Mobile-first, minimalist design
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.2.2';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.4';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -229,6 +229,9 @@ class PaceCompact extends HTMLElement {
           border-radius: var(--ha-card-border-radius, 12px);
           box-shadow: var(--ha-card-box-shadow, 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2));
         }
+        :host([ha]) .action-button {
+          border-radius: 8px;
+        }
 
         .card {
           background: var(--ls-card, #181f2b);
@@ -356,9 +359,10 @@ class PaceCompact extends HTMLElement {
         .action-button {
           width: 38px;
           height: 38px;
-          border-radius: 50%;
-          background: var(--pace-accent-color, var(--ls-accent, #2b6fd9));
-          color: white;
+          border-radius: 0;
+          border: 1px solid var(--pace-accent-color, var(--ls-accent, #2b6fd9));
+          background: transparent;
+          color: var(--pace-accent-color, var(--ls-accent, #2b6fd9));
           font-family: ${TERMINAL_FONT_MONO};
           display: flex;
           align-items: center;
@@ -366,16 +370,16 @@ class PaceCompact extends HTMLElement {
           font-size: 10px;
           font-weight: 800;
           cursor: pointer;
-          transition: filter 0.15s ease;
+          transition: background-color 0.15s ease, color 0.15s ease;
           flex: 0 0 auto;
-          border: none;
           letter-spacing: 0.5px;
           white-space: nowrap;
           padding: 0;
         }
 
         .action-button:hover {
-          filter: brightness(1.1);
+          background: var(--pace-accent-color, var(--ls-accent, #2b6fd9));
+          color: #fff;
         }
 
         .action-button:active {
@@ -383,8 +387,10 @@ class PaceCompact extends HTMLElement {
         }
 
         .action-button.running {
-          animation: pulse-glow 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
           background: var(--ls-success, #16a34a);
+          border-color: var(--ls-success, #16a34a);
+          color: #fff;
+          animation: pulse-glow 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         @keyframes pulse-glow {
@@ -592,4 +598,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.2.2 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.3.4 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

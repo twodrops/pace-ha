@@ -518,7 +518,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # This allows multiple instances with different servers
         if data[CONF_CUSTOM_SERVER]:
             unique_id = f"{DOMAIN}_{data[CONF_CUSTOM_SERVER]}"
-            title = "Pace - Custom"
+            title = "PACE - Custom"
         elif data[CONF_SERVER_ID] is not None:
             unique_id = f"{DOMAIN}_server_{data[CONF_SERVER_ID]}"
             # Try to get server name from the servers list
@@ -527,10 +527,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if server["id"] == data[CONF_SERVER_ID]:
                     server_name = server["name"]
                     break
-            title = f"Pace - {server_name}"
+            title = f"PACE - {server_name}"
         else:
             unique_id = f"{DOMAIN}_automatic"
-            title = "Pace (Automatic)"
+            title = "PACE (Automatic)"
 
         await self.async_set_unique_id(unique_id)
         self._abort_if_unique_id_configured()
@@ -572,7 +572,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     domain_name = custom_url
 
                 return self.async_create_entry(
-                    title=f"Pace - {domain_name}",
+                    title=f"PACE - {domain_name}",
                     data=data,
                 )
 
