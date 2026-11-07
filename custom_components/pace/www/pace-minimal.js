@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.3.4
+ * Version: 1.3.5
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.4';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.5';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -493,7 +493,7 @@ class PaceMinimal extends HTMLElement {
       </div>
     `;
 
-    applyTerminalPalette(this.shadowRoot, this._hass);
+    applyTerminalPalette(this.shadowRoot, this._hass, this._config);
 
     this.shadowRoot.querySelector('.test-btn')?.addEventListener('click', () => this._runTest());
     this.shadowRoot.querySelector('.isp-text')?.addEventListener('click', () => navigateToPaceIntegration());
@@ -654,4 +654,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.3.4 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.3.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
