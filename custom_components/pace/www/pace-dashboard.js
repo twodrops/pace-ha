@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.3.5
+ * Version: 1.3.6
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.5';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.6';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -485,16 +485,19 @@ class PaceDashboard extends HTMLElement {
   _gridLinesSvg(width, height, fractions = [0.25, 0.5, 0.75]) {
     return fractions.map(fraction => {
       const y = (height * fraction).toFixed(1);
-      return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="var(--divider-color, #2a3142)" stroke-width="0.5" stroke-dasharray="2 5" vector-effect="non-scaling-stroke" />`;
+      return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="var(--ls-border, #2a3142)" stroke-width="0.5" stroke-dasharray="2 5" vector-effect="non-scaling-stroke" />`;
     }).join('');
   }
 
   // Fixed look-and-feel for every chart (not user-configurable): 1.6px
   // strokes, gradient fills 18% -> 0%, dashed grid lines (see _gridLinesSvg).
-  _renderSeriesShapes(type, points, width, height, gradientId) {
+  // A second series in the same chart is drawn dashed (FRITZ-Portal's own
+  // solid-primary/dashed-secondary convention), not just a different color.
+  _renderSeriesShapes(type, points, width, height, gradientId, dashed = false) {
     const path = this._smoothPath(points);
     const color = this._chartColor(type);
     const area = `<path d="${path} L${width},${height} L0,${height} Z" fill="url(#${gradientId})" stroke="none" />`;
+    const dashAttr = dashed ? ' stroke-dasharray="5 3"' : '';
 
     return `
       <defs>
@@ -504,7 +507,7 @@ class PaceDashboard extends HTMLElement {
         </linearGradient>
       </defs>
       ${area}
-      <path d="${path}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="1.6"${dashAttr} vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
     `;
   }
 
@@ -578,7 +581,7 @@ class PaceDashboard extends HTMLElement {
         const values = seriesData[i].map(p => p.v);
         if (values.length === 0) return '';
         const points = this._scaledPoints(values, 0, niceMax, width, height);
-        return this._renderSeriesShapes(s.key, points, width, height, `grad-${chartKey}-${s.key}`);
+        return this._renderSeriesShapes(s.key, points, width, height, `grad-${chartKey}-${s.key}`, i > 0);
       }).join('');
       svg.innerHTML = `${this._gridLinesSvg(width, height, [0, 0.25, 0.5, 0.75, 1])}${shapes}`;
     } else if (svg) {
@@ -771,6 +774,7 @@ class PaceDashboard extends HTMLElement {
           }
           :host([ha]) .card {
             border-radius: var(--ha-card-border-radius, 12px);
+            border-width: var(--ha-card-border-width, 1px);
             box-shadow: var(--ha-card-box-shadow, 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2));
           }
           :host([ha]) .isp-name::before,
@@ -815,12 +819,13 @@ class PaceDashboard extends HTMLElement {
           }
 
           .card {
+            --card-pad: 12px;
             background: var(--ls-card, #181f2b);
             border-radius: 0;
-            padding: 12px;
-            padding-left: max(12px, env(safe-area-inset-left));
-            padding-right: max(12px, env(safe-area-inset-right));
-            border: 1px solid var(--ha-card-border-color, var(--divider-color, #2a3142));
+            padding: var(--card-pad);
+            padding-left: max(var(--card-pad), env(safe-area-inset-left));
+            padding-right: max(var(--card-pad), env(safe-area-inset-right));
+            border: 1px solid var(--ls-border, #2a3142);
             box-shadow: var(--ha-card-box-shadow, none);
             color: var(--primary-text-color, #f8fafc);
             font-family: ${TERMINAL_FONT_MONO};
@@ -833,7 +838,7 @@ class PaceDashboard extends HTMLElement {
             flex: 1;
             direction: ltr;
           }
-          .header { margin: -12px -12px 10px -12px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-shrink: 0; background: var(--ls-head, #1d2330); border-bottom: 1px solid var(--divider-color, #2a3142); }
+          .header { margin: calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad)) 10px calc(-1 * var(--card-pad)); padding: 10px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-shrink: 0; background: var(--ls-head, #1d2330); border-bottom: 1px solid var(--ls-border, #2a3142); }
           .isp-info { min-width: 0; overflow: hidden; }
           .isp-name { font-size: 16px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--primary-text-color, #f8fafc); cursor: pointer; transition: opacity 0.15s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .isp-name:hover { opacity: 0.8; }
@@ -855,7 +860,7 @@ class PaceDashboard extends HTMLElement {
           .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; cursor: pointer; transition: opacity 0.15s ease; }
           .heartbeat-strip:hover { opacity: 0.8; }
           .heartbeat-strip:active { opacity: 0.6; }
-          .hb-bar { width: 3px; height: 10px; background: var(--divider-color, #2a3142); }
+          .hb-bar { width: 3px; height: 10px; background: var(--ls-border, #2a3142); }
           .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
           .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
 
@@ -865,13 +870,13 @@ class PaceDashboard extends HTMLElement {
           .section-title {
             font-size: 10px;
             font-weight: 400;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.4px;
             text-transform: uppercase;
             color: var(--ls-text2, #8390a3);
             white-space: nowrap;
-            margin: 14px -12px 8px;
-            padding: 10px 12px 0;
-            border-top: 1px solid var(--divider-color, #2a3142);
+            margin: 14px calc(-1 * var(--card-pad)) 8px;
+            padding: 10px var(--card-pad) 0;
+            border-top: 1px solid var(--ls-border, #2a3142);
           }
           .section-title:first-child { margin-top: 0; }
           /* The header already ends in its own divider line (border-bottom),
@@ -892,13 +897,16 @@ class PaceDashboard extends HTMLElement {
             flex-shrink: 0;
           }
           /* Stat card: label, big value + unit, optional muted subtitle,
-             optional trend sparkline or capacity bar. */
+             optional trend sparkline or capacity bar. Matches FRITZ-Portal's
+             .tile exactly: no fill at rest (border only), a plain neutral
+             bg2 fill on hover (not accent-tinted) and a slightly stronger
+             neutral fill on press - no color-mix/accent blending anywhere. */
           .metric {
             position: relative;
-            background: var(--ls-panel, var(--secondary-background-color, #10141b));
+            background: transparent;
             border-radius: 0;
             padding: 10px 12px;
-            border: 1px solid var(--divider-color, #2a3142);
+            border: 1px solid var(--ls-border, #2a3142);
             cursor: pointer;
             transition: background-color 0.15s ease;
             touch-action: manipulation;
@@ -907,8 +915,8 @@ class PaceDashboard extends HTMLElement {
             flex-direction: column;
             gap: 4px;
           }
-          .metric:hover { background: var(--ls-panel, #171d27); filter: brightness(1.15); }
-          .metric:active { background: var(--ls-panel, #171d27); filter: brightness(1.3); }
+          .metric:hover { background: var(--ls-head, #1d2330); }
+          .metric:active { background: var(--ls-border-hot, #3a4554); }
           /* Corner-bracket frame: literal Unicode box-drawing glyphs sitting
              right on the border corners (not CSS-drawn rectangles). Only on
              the 4 stat cards that actually carry a sparkline, colored to
@@ -922,7 +930,7 @@ class PaceDashboard extends HTMLElement {
           .metric .tk.tr { top: -2px; right: -1px; }
           .metric .tk.bl { bottom: -3px; left: -1px; }
           .metric .tk.br { bottom: -3px; right: -1px; }
-          .metric .label { font-size: 9px; color: var(--secondary-text-color, #94a3b8); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+          .metric .label { font-size: 9.5px; color: var(--secondary-text-color, #94a3b8); text-transform: uppercase; letter-spacing: 1px; font-weight: 400; }
           .metric .value-row { display: flex; align-items: baseline; gap: 3px; }
           .metric .value { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.3px; color: var(--primary-text-color, #f8fafc); }
           .metric .value::before { content: attr(data-val); }
@@ -931,7 +939,7 @@ class PaceDashboard extends HTMLElement {
           .metric .subtitle:not(:empty)::before { content: '— '; }
           .metric .indicator { margin-top: 2px; }
           .metric .indicator-chart svg { width: 100%; height: 24px; display: block; overflow: visible; }
-          .metric .bar-track { width: 100%; height: 4px; border-radius: 0; background: var(--divider-color, #2a3142); overflow: hidden; }
+          .metric .bar-track { width: 100%; height: 4px; border-radius: 0; background: var(--ls-border, #2a3142); overflow: hidden; }
           .metric .bar-fill { height: 100%; width: 0%; border-radius: 0; transition: width 0.4s ease, background-color 0.3s ease; }
 
           .optional-grid {
@@ -977,7 +985,7 @@ class PaceDashboard extends HTMLElement {
 
           .gauge-bg {
             fill: none;
-            stroke: var(--divider-color, #2a3142);
+            stroke: var(--ls-border, #2a3142);
             stroke-width: 10;
             stroke-linecap: round;
             stroke-dasharray: 424 566;
@@ -1005,12 +1013,12 @@ class PaceDashboard extends HTMLElement {
           }
 
           .gauge-label {
-            font-size: 9px;
+            font-size: 9.5px;
             color: var(--secondary-text-color, #94a3b8);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 4px;
-            font-weight: 600;
+            font-weight: 400;
           }
 
           .gauge-value {
@@ -1030,13 +1038,14 @@ class PaceDashboard extends HTMLElement {
 
           /* Live chart cards (traffic + latency): title/legend header,
              y-axis labels beside the plot, x-axis start/end time, and a
-             hover tooltip + crosshair. */
+             hover tooltip + crosshair. No fill at rest, matching FRITZ's
+             bare sparkline - border alone provides the containment. */
           .chart-card {
             position: relative;
-            background: var(--ls-panel, var(--secondary-background-color, #10141b));
+            background: transparent;
             border-radius: 0;
             padding: 10px 12px;
-            border: 1px solid var(--divider-color, #2a3142);
+            border: 1px solid var(--ls-border, #2a3142);
             margin-bottom: 10px;
             flex-shrink: 0;
           }
@@ -1051,7 +1060,7 @@ class PaceDashboard extends HTMLElement {
           .chart-yaxis { display: flex; flex-direction: column; justify-content: space-between; font-size: 8px; color: var(--secondary-text-color, #64748b); text-align: right; padding: 2px 0; }
           .chart-plot { position: relative; flex: 1; min-width: 0; touch-action: pan-y; }
           .chart-plot svg { width: 100%; height: 110px; display: block; overflow: visible; }
-          .chart-crosshair { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--divider-color, #3a4554); pointer-events: none; transition: left 0.12s cubic-bezier(0.34, 1.56, 0.64, 1); }
+          .chart-crosshair { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--ls-border, #3a4554); pointer-events: none; transition: left 0.12s cubic-bezier(0.34, 1.56, 0.64, 1); }
           /* Hover marker: a small white dot on each series' line, sitting
              right on the crosshair. */
           .chart-dot {
@@ -1074,7 +1083,7 @@ class PaceDashboard extends HTMLElement {
             top: 4px;
             min-width: 90px;
             background: var(--card-background-color, #10141d);
-            border: 1px solid var(--divider-color, #2a3142);
+            border: 1px solid var(--ls-border, #2a3142);
             border-radius: 0;
             transition: left 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
             padding: 5px 8px;
@@ -1089,16 +1098,16 @@ class PaceDashboard extends HTMLElement {
           .chart-tooltip .tooltip-row i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
           .chart-tooltip .tooltip-row b { color: var(--primary-text-color, #f8fafc); }
           .chart-xaxis { display: flex; justify-content: space-between; font-size: 8px; color: var(--secondary-text-color, #64748b); margin: 4px 0 8px 0; padding-left: 22px; }
-          .chart-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 9px; color: var(--secondary-text-color, #64748b); padding-top: 8px; border-top: 1px solid var(--divider-color, rgba(255,255,255,0.05)); }
+          .chart-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 9px; color: var(--secondary-text-color, #64748b); padding-top: 8px; border-top: 1px solid var(--ls-border, rgba(255,255,255,0.05)); }
           .chart-foot span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
           .footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 0 -12px;
-            padding: 10px 12px 0;
-            border-top: 1px solid var(--divider-color, rgba(255,255,255,0.05));
+            margin: 0 calc(-1 * var(--card-pad));
+            padding: 10px var(--card-pad) 0;
+            border-top: 1px solid var(--ls-border, rgba(255,255,255,0.05));
             flex-shrink: 0;
           }
           .last-test { font-size: 11px; color: var(--secondary-text-color, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; cursor: pointer; transition: opacity 0.15s ease; }
@@ -1122,40 +1131,34 @@ class PaceDashboard extends HTMLElement {
 
           /* Container query responsive adjustments */
           @container (max-width: 500px) {
-            .card { padding: 14px; }
+            .card { --card-pad: 14px; padding: 14px; }
             .isp-name { font-size: 16px; }
             .server-name { font-size: 11px; }
             .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .metric .label { font-size: 8px; }
             .metric .value { font-size: 19px; }
             .optional-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
             .optional-grid .metric .value { font-size: 13px; }
-            .optional-grid .metric .label { font-size: 7px; }
             .gauge { width: 110px; height: 110px; }
             .gauge-value { font-size: 22px; }
-            .gauge-label { font-size: 8px; }
             .gauge-unit { font-size: 8px; }
             .chart-legend { gap: 10px; }
             .chart-xaxis { padding-left: 18px; }
           }
 
           @container (max-width: 400px) {
-            .card { padding: 12px; }
+            .card { --card-pad: 12px; padding: 12px; }
             .header { margin-bottom: 10px; }
             .isp-name { font-size: 15px; }
             .server-name { font-size: 10px; }
             .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px; }
             .metric { padding: 8px 10px; }
-            .metric .label { font-size: 7px; letter-spacing: 0.3px; }
             .metric .value { font-size: 17px; }
             .optional-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 10px; }
             .optional-grid .metric { padding: 6px 8px; }
             .optional-grid .metric .value { font-size: 12px; }
-            .optional-grid .metric .label { font-size: 7px; }
             .gauges-container { gap: 10px; margin: 12px 0; }
             .gauge { width: 100px; height: 100px; }
             .gauge-value { font-size: 20px; }
-            .gauge-label { font-size: 7px; letter-spacing: 0.5px; }
             .gauge-unit { font-size: 7px; }
             .gauge-bg, .gauge-fill { stroke-width: 9; }
             .chart-card { padding: 8px 10px; }
@@ -1170,21 +1173,18 @@ class PaceDashboard extends HTMLElement {
           }
 
           @container (max-width: 320px) {
-            .card { padding: 10px; }
+            .card { --card-pad: 10px; padding: 10px; }
             .isp-name { font-size: 14px; }
             .server-name { font-size: 9px; }
             .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 5px; }
             .metric { padding: 6px 8px; }
-            .metric .label { font-size: 7px; }
             .metric .value { font-size: 15px; }
             .optional-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
             .optional-grid .metric { padding: 5px 6px; }
             .optional-grid .metric .value { font-size: 10px; }
-            .optional-grid .metric .label { font-size: 6px; }
             .gauges-container { flex-direction: column; gap: 8px; margin: 10px 0; }
             .gauge { width: 90px; height: 90px; }
             .gauge-value { font-size: 18px; }
-            .gauge-label { font-size: 7px; }
             .gauge-unit { font-size: 7px; }
             .gauge-bg, .gauge-fill { stroke-width: 8; }
             .chart-plot svg { height: 70px; }
@@ -1195,14 +1195,13 @@ class PaceDashboard extends HTMLElement {
           }
 
           @container (max-width: 280px) {
-            .card { padding: 8px; }
+            .card { --card-pad: 8px; padding: 8px; }
             .header { margin-bottom: 8px; }
             .metrics-grid { gap: 4px; margin-bottom: 8px; }
             .optional-grid { gap: 3px; margin-bottom: 8px; }
             .gauges-container { margin: 8px 0; }
             .gauge { width: 80px; height: 80px; }
             .gauge-value { font-size: 16px; }
-            .gauge-label { font-size: 6px; }
             .gauge-unit { font-size: 6px; }
             .chart-yaxis { display: none; }
             .chart-xaxis { padding-left: 0; }
@@ -1648,4 +1647,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.3.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.3.6 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

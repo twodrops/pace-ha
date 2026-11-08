@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.3.5
+ * Version: 1.3.6
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.5';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.6';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -248,6 +248,7 @@ class PaceMinimal extends HTMLElement {
         }
         :host([ha]) .card {
           border-radius: var(--ha-card-border-radius, 12px);
+          border-width: var(--ha-card-border-width, 1px);
           box-shadow: var(--ha-card-box-shadow, 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2));
         }
         :host([ha]) .isp-text::before { display: none; }
@@ -269,7 +270,7 @@ class PaceMinimal extends HTMLElement {
           padding: 20px;
           color: var(--primary-text-color, #f8fafc);
           font-family: ${TERMINAL_FONT_MONO};
-          border: 1px solid var(--ha-card-border-color, var(--divider-color, #2a3142));
+          border: 1px solid var(--ls-border, #2a3142);
           box-shadow: var(--ha-card-box-shadow, none);
           width: 100%;
           height: 100%;
@@ -333,7 +334,7 @@ class PaceMinimal extends HTMLElement {
           transform: translateY(0) scale(0.97);
         }
         .speed-label {
-          font-size: 10px;
+          font-size: 9.5px;
           color: var(--secondary-text-color, #94a3b8);
           text-transform: uppercase;
           letter-spacing: 1px;
@@ -341,7 +342,7 @@ class PaceMinimal extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 6px;
-          font-weight: 600;
+          font-weight: 400;
         }
         .speed-value {
           font-size: 36px;
@@ -372,23 +373,22 @@ class PaceMinimal extends HTMLElement {
           gap: 8px;
           font-size: 14px;
           color: var(--secondary-text-color, #94a3b8);
-          background: var(--ls-panel, var(--secondary-background-color, #10141b));
+          background: transparent;
           padding: 8px 16px;
           border-radius: 0;
-          border: 1px solid var(--divider-color, #2a3142);
+          border: 1px solid var(--ls-border, #2a3142);
           flex: 1;
           min-width: 0;
-        }
-        .ping-row {
           cursor: pointer;
           transition: background-color 0.2s;
         }
-        .ping-row:hover {
-          background: var(--ls-panel, var(--secondary-background-color, #10141b));
-          filter: brightness(1.15);
+        .ping-row:hover,
+        .link-row:hover {
+          background: var(--ls-head, #10141b);
         }
-        .ping-row:active {
-          filter: brightness(1.3);
+        .ping-row:active,
+        .link-row:active {
+          background: var(--ls-border-hot, #3a4554);
         }
         .ping-value {
           color: var(--ls-ping, #c97b1a);
@@ -402,14 +402,9 @@ class PaceMinimal extends HTMLElement {
           text-overflow: ellipsis;
           white-space: nowrap;
           cursor: pointer;
-          transition: opacity 0.15s ease;
         }
-        .link-row .ip-text:hover { opacity: 0.8; }
-        .link-row .ip-text:active { opacity: 0.6; }
-        .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; cursor: pointer; transition: opacity 0.15s ease; }
-        .heartbeat-strip:hover { opacity: 0.8; }
-        .heartbeat-strip:active { opacity: 0.6; }
-        .hb-bar { width: 2px; height: 8px; background: var(--divider-color, #2a3142); }
+        .heartbeat-strip { display: flex; gap: 1px; flex-shrink: 0; cursor: pointer; }
+        .hb-bar { width: 2px; height: 8px; background: var(--ls-border, #2a3142); }
         .hb-bar.hb-ok { background: var(--ls-success, #16a34a); }
         .hb-bar.hb-fail { background: var(--ls-danger, #dc2626); }
         .test-btn {
@@ -654,4 +649,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.3.5 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.3.6 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

@@ -14,6 +14,9 @@ const TERMINAL_PALETTE = {
     warning: '#c97b1a',
     danger: '#d24343',
     'border-hot': '#c0c8d4',
+    // Main card/tile border - exact FRITZ!Portal reference value, fixed
+    // regardless of the active HA theme so terminal style stays consistent.
+    border: '#d8dde5',
     // Outer card vs. header-strip/tile background - exact FRITZ!Portal
     // reference values (card is pure white, head/panel a soft grey).
     card: '#ffffff',
@@ -34,6 +37,7 @@ const TERMINAL_PALETTE = {
     warning: '#ffb86c',
     danger: '#ff6b6b',
     'border-hot': '#3a4554',
+    border: '#2a323e',
     // Exact FRITZ!Portal reference values - slightly greyish slate, not
     // the near-black #1b2130/#10141b used before.
     card: '#1a1f28',
@@ -55,14 +59,22 @@ const HA_STYLE_COLOR_MAP = {
   success: 'var(--success-color, #43a047)',
   warning: 'var(--warning-color, #ffa600)',
   danger: 'var(--error-color, #db4437)',
+  // Matches FRITZ!Portal's own :host([ha]) override, which also swaps its
+  // fixed border for the active HA theme's card border/divider color.
+  border: 'var(--ha-card-border-color, var(--divider-color))',
+  // FRITZ!Portal's own ha-mode override also collapses its secondary/more-
+  // contrast border onto the same plain divider color as the primary one.
+  'border-hot': 'var(--divider-color)',
   // In HA style, the outer card, header strip, and tile panels all fully
   // revert to the active HA theme's own card background (matching the
   // FRITZ!Portal reference exactly) - tiles rely on their border for
   // definition instead of a contrasting fill, so they don't look like an
-  // unrelated bright box dropped onto a native HA card.
+  // unrelated bright box dropped onto a native HA card. head/panel alias
+  // --ls-card directly (rather than repeating the same var() chain) so
+  // they can never resolve to a different value than the card itself.
   card: 'var(--ha-card-background, var(--card-background-color))',
-  head: 'var(--ha-card-background, var(--card-background-color))',
-  panel: 'var(--ha-card-background, var(--card-background-color))',
+  head: 'var(--ls-card)',
+  panel: 'var(--ls-card)',
   text2: 'var(--secondary-text-color)'
 };
 
