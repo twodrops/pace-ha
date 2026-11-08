@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.4.0
+ * Version: 1.5.0
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.4.0';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.5.0';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -650,12 +650,14 @@ class PaceDashboard extends HTMLElement {
     if (xStart) xStart.textContent = allPoints.length ? this._formatClock(allPoints[0].t) : '--:--';
     if (xEnd) xEnd.textContent = allPoints.length ? this._formatClock(allPoints[allPoints.length - 1].t) : '--:--';
 
-    // Legend current values
+    // Legend values: the window average (same history window as the chart
+    // itself), not the live current reading - the live value is already
+    // shown in the metric tiles/gauges above, so this avoids duplicating it.
     series.forEach(s => {
       const el = root.querySelector(`.legend-${s.key} b`);
       if (!el) return;
-      const current = parseFloat(this._getState(this._resolve(s.key, this._config.entities[s.key])));
-      el.textContent = !isNaN(current) ? current.toFixed(1) : '--';
+      const data = this._history?.[s.key] || [];
+      el.textContent = data.length ? this._averageHistory(s.key).toFixed(1) : '--';
     });
 
     const footerEl = root.querySelector('.chart-foot-left');
@@ -1376,8 +1378,8 @@ class PaceDashboard extends HTMLElement {
           <div class="chart-head">
             <div class="chart-title">THROUGHPUT</div>
             <div class="chart-legend">
-              <span class="legend-download"><i style="background:${this._chartColor('download')}"></i>${labels.download} <b>0</b> Mbps</span>
-              <span class="legend-upload"><i style="background:${this._chartColor('upload')}"></i>${labels.upload} <b>0</b> Mbps</span>
+              <span class="legend-download"><i style="background:${this._chartColor('download')}"></i>${labels.download} (avg) <b>0</b> Mbps</span>
+              <span class="legend-upload"><i style="background:${this._chartColor('upload')}"></i>${labels.upload} (avg) <b>0</b> Mbps</span>
             </div>
           </div>
           <div class="chart-body">
@@ -1396,8 +1398,8 @@ class PaceDashboard extends HTMLElement {
           <div class="chart-head">
             <div class="chart-title">LATENCY</div>
             <div class="chart-legend">
-              <span class="legend-ping"><i style="background:${this._chartColor('ping')}"></i>${labels.ping} <b>0</b> ms</span>
-              <span class="legend-jitter"><i style="background:${this._chartColor('jitter')}"></i>${labels.jitter} <b>0</b> ms</span>
+              <span class="legend-ping"><i style="background:${this._chartColor('ping')}"></i>${labels.ping} (avg) <b>0</b> ms</span>
+              <span class="legend-jitter"><i style="background:${this._chartColor('jitter')}"></i>${labels.jitter} (avg) <b>0</b> ms</span>
             </div>
           </div>
           <div class="chart-body">
@@ -1725,4 +1727,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.4.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.5.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

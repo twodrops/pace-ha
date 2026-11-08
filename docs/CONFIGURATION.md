@@ -72,7 +72,7 @@ These are set in the card's visual editor (or directly in its YAML), not through
 | **Average Gauges** | Toggle | Off | Show the gauges' mean over History (hours) instead of the live current reading; the gauge label shows the averaging window, e.g. "Download (7D AVG)" |
 | **Show Charts** | Toggle | On | Show/hide the Throughput/Latency history charts |
 | **Show Plan & Usage** | Toggle | On | Show/hide the whole Plan Compliance + Data Usage section |
-| **Max Download/Upload (Mbps)** | Number | Auto | Overrides the gauges' scale; auto uses the ISP rated speed (+20%) if set, else 1000/500 |
+| **Max Download/Upload (Mbps)** | Number | Auto | Overrides the gauges' scale; auto uses the ISP rated speed (+20%) if set, else 1000/500. On a 1 Gbps+ connection, set this explicitly (or set an ISP rated speed) - otherwise the gauge ring reads as always "full" since the fallback scale (1000/500) is lower than your actual speed |
 | **History (hours)** | Number | 168 (7 days) | How far back the charts' history query looks |
 
 ## Backend Selection Guide
