@@ -2,7 +2,7 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.3.6
+ * Version: 1.4.0
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -11,7 +11,7 @@
  * - Mobile-first, minimalist design
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.6';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.4.0';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -327,9 +327,9 @@ class PaceCompact extends HTMLElement {
         }
 
         .stat-icon {
-          --mdc-icon-size: 12px;
-          width: 12px;
-          height: 12px;
+          --mdc-icon-size: 14px;
+          width: 14px;
+          height: 14px;
           opacity: 0.75;
           margin: 0;
           flex-shrink: 0;
@@ -340,14 +340,14 @@ class PaceCompact extends HTMLElement {
         .stat-ping .stat-icon { color: var(--ls-ping, #c97b1a); }
 
         .stat-value {
-          font-size: 13px;
+          font-size: 16px;
           font-weight: 700;
           font-family: ${TERMINAL_FONT_MONO};
           letter-spacing: -0.02em;
         }
 
         .stat-unit {
-          font-size: 9px;
+          font-size: 10.5px;
           font-weight: 500;
           opacity: 0.5;
           margin: 0;
@@ -368,7 +368,7 @@ class PaceCompact extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 800;
           cursor: pointer;
           transition: background-color 0.15s ease, color 0.15s ease;
@@ -430,8 +430,8 @@ class PaceCompact extends HTMLElement {
         @container (max-width: 320px) {
           .stat-icon { display: none; }
           .stats { gap: 4px; }
-          .stat-value { font-size: 11px; }
-          .stat-unit { font-size: 8px; }
+          .stat-value { font-size: 13px; }
+          .stat-unit { font-size: 9px; }
           .card { padding: 4px 8px; }
         }
       </style>
@@ -599,4 +599,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.3.6 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.4.0 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

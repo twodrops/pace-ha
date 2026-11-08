@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.3.6
+ * Version: 1.4.0
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.3.6';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.4.0';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -100,6 +100,7 @@ class PaceDashboard extends HTMLElement {
       },
       show_gauges: true,
       show_charts: true,
+      gauge_average: false,
       show_plan_usage: true,
       history_hours: 168,  // 7 days (24 * 7)
       terminal_style: true
@@ -125,6 +126,17 @@ class PaceDashboard extends HTMLElement {
     // Live-update the title if the card is already rendered (editor preview).
     const titleEl = this.shadowRoot?.querySelector('.isp-name');
     if (titleEl) titleEl.textContent = this._config.title;
+    // Average Gauges may have just been turned on after the periodic history
+    // fetch already ran once (which only happens on connect) - fetch now
+    // instead of leaving the gauges at 0 until the next 5-minute interval.
+    if (this._config.gauge_average && this._hass && !this._history?.download?.length) {
+      this._fetchHistory();
+    }
+    // Reflect an Average Gauges toggle (on or off) immediately, rather than
+    // waiting for the next unrelated state change to refresh the gauges.
+    if (this._config.show_gauges && this._hass && this.shadowRoot?.querySelector('.gauge-download')) {
+      this._updateGauges();
+    }
   }
 
   set hass(hass) {
@@ -169,7 +181,7 @@ class PaceDashboard extends HTMLElement {
     // now that there's something to populate.
     if (this._hass) this.updateCard();
     // Fetch history immediately if hass is already available
-    if (this._hass && this._config.show_charts) {
+    if (this._hass && (this._config.show_charts || this._config.gauge_average)) {
       this._fetchHistory();
     }
   }
@@ -195,7 +207,7 @@ class PaceDashboard extends HTMLElement {
   }
 
   async _fetchHistory() {
-    if (!this._hass || !this._config.show_charts) return;
+    if (!this._hass || !(this._config.show_charts || this._config.gauge_average)) return;
 
     const e = this._config.entities;
     const download = this._resolve('download', e.download);
@@ -261,6 +273,9 @@ class PaceDashboard extends HTMLElement {
       if (this._config.show_charts) {
         this._drawCharts();
       }
+      if (this._config.gauge_average) {
+        this._updateGauges();
+      }
     } catch (error) {
       console.error('Failed to fetch history:', error);
       // Fallback to current values if history fetch fails
@@ -273,6 +288,9 @@ class PaceDashboard extends HTMLElement {
       };
       if (this._config.show_charts) {
         this._drawCharts();
+      }
+      if (this._config.gauge_average) {
+        this._updateGauges();
       }
     }
   }
@@ -296,16 +314,9 @@ class PaceDashboard extends HTMLElement {
     this._updateMetricValue('.metric-ping', this._resolve('ping', e.ping));
     this._updateMetricValue('.metric-jitter', this._resolve('jitter', e.jitter));
 
-    // Update gauges if enabled. Scale defaults to the configured ISP rated
-    // speed (with headroom) when max_download/max_upload aren't explicitly
-    // set, so the ring reads near-full at your plan's actual speed.
+    // Update gauges if enabled.
     if (this._config.show_gauges) {
-      const download = parseFloat(this._getState(this._resolve('download', e.download))) || 0;
-      const upload = parseFloat(this._getState(this._resolve('upload', e.upload))) || 0;
-      const maxDownload = this._config.max_download || this._autoGaugeMax('download', 1000);
-      const maxUpload = this._config.max_upload || this._autoGaugeMax('upload', 500);
-      this._updateGauge('download', download, maxDownload);
-      this._updateGauge('upload', upload, maxUpload);
+      this._updateGauges();
     }
 
     // Optional Metrics. Units are static markup (see render()); JS only
@@ -418,11 +429,50 @@ class PaceDashboard extends HTMLElement {
     }
   }
 
+  // Mean of a metric's fetched history points; 0 if none are available yet.
+  _averageHistory(type) {
+    const data = this._history?.[type] || [];
+    if (!data.length) return 0;
+    return data.reduce((sum, p) => sum + p.v, 0) / data.length;
+  }
+
+  // "168" -> "7D", "24" -> "1D", "6" -> "6H" - used in the gauge-average label.
+  _formatHistoryWindow(hours) {
+    return hours % 24 === 0 ? `${hours / 24}D` : `${hours}H`;
+  }
+
+  // Scale defaults to the configured ISP rated speed (with headroom) when
+  // max_download/max_upload aren't explicitly set, so the ring reads
+  // near-full at your plan's actual speed. In average mode, the value is
+  // the mean of the fetched history instead of the current live reading.
+  _updateGauges() {
+    const e = this._config.entities;
+    const isAverage = !!this._config.gauge_average;
+    const download = isAverage ? this._averageHistory('download') : (parseFloat(this._getState(this._resolve('download', e.download))) || 0);
+    const upload = isAverage ? this._averageHistory('upload') : (parseFloat(this._getState(this._resolve('upload', e.upload))) || 0);
+    const maxDownload = this._config.max_download || this._autoGaugeMax('download', 1000);
+    const maxUpload = this._config.max_upload || this._autoGaugeMax('upload', 500);
+    this._updateGauge('download', download, maxDownload);
+    this._updateGauge('upload', upload, maxUpload);
+  }
+
   _updateGauge(type, value, max) {
     const gauge = this.shadowRoot.querySelector(`.gauge-${type} .gauge-fill`);
     const valueEl = this.shadowRoot.querySelector(`.gauge-${type} .gauge-value`);
+    const labelEl = this.shadowRoot.querySelector(`.gauge-${type} .gauge-label`);
+    const avgBadgeEl = this.shadowRoot.querySelector(`.gauge-${type} .gauge-avg-badge`);
 
     if (!gauge || !valueEl) return;
+
+    if (labelEl) {
+      labelEl.textContent = this._config.labels?.[type] || (type === 'download' ? 'Download' : 'Upload');
+    }
+    if (avgBadgeEl) {
+      avgBadgeEl.style.display = this._config.gauge_average ? '' : 'none';
+      avgBadgeEl.textContent = this._config.gauge_average
+        ? `${this._formatHistoryWindow(this._config.history_hours || 168)} AVG`
+        : '';
+    }
 
     const numValue = parseFloat(value) || 0;
     const percentage = Math.min((numValue / max) * 100, 100);
@@ -1010,6 +1060,7 @@ class PaceDashboard extends HTMLElement {
             display: flex;
             flex-direction: column;
             align-items: center;
+            max-width: 84px;
           }
 
           .gauge-label {
@@ -1018,7 +1069,21 @@ class PaceDashboard extends HTMLElement {
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
             font-weight: 400;
+          }
+
+          /* Hidden entirely unless Average Gauges is on (toggled via JS),
+             so it doesn't reserve any space in the default live mode. */
+          .gauge-avg-badge {
+            font-size: 7.5px;
+            color: var(--secondary-text-color, #64748b);
+            letter-spacing: 0.5px;
+            margin-top: -2px;
+            margin-bottom: 3px;
           }
 
           .gauge-value {
@@ -1284,6 +1349,7 @@ class PaceDashboard extends HTMLElement {
             </svg>
             <div class="gauge-content">
               <div class="gauge-label">${labels.download}</div>
+              <div class="gauge-avg-badge"></div>
               <div class="gauge-value">0</div>
               <div class="gauge-unit">Mbps</div>
             </div>
@@ -1296,6 +1362,7 @@ class PaceDashboard extends HTMLElement {
             </svg>
             <div class="gauge-content">
               <div class="gauge-label">${labels.upload}</div>
+              <div class="gauge-avg-badge"></div>
               <div class="gauge-value">0</div>
               <div class="gauge-unit">Mbps</div>
             </div>
@@ -1503,6 +1570,17 @@ class PaceDashboardEditor extends HTMLElement {
     chartsToggle.appendChild(chartsCheckbox);
     genDiv.appendChild(chartsToggle);
 
+    const gaugeAverageToggle = document.createElement('div');
+    gaugeAverageToggle.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
+    gaugeAverageToggle.innerHTML = `<label style="font-size: 12px; color: var(--secondary-text-color, #ccc);">Average Gauges</label>`;
+    const gaugeAverageCheckbox = document.createElement('input');
+    gaugeAverageCheckbox.type = "checkbox";
+    gaugeAverageCheckbox.checked = this._config.gauge_average === true;
+    gaugeAverageCheckbox.style.cssText = "width: 20px; height: 20px; cursor: pointer;";
+    gaugeAverageCheckbox.addEventListener('change', (e) => this.configChanged({ ...this._config, gauge_average: e.target.checked }));
+    gaugeAverageToggle.appendChild(gaugeAverageCheckbox);
+    genDiv.appendChild(gaugeAverageToggle);
+
     const maxDlOption = document.createElement('div');
     maxDlOption.style.cssText = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;";
     maxDlOption.innerHTML = `<label style="font-size: 12px; color: var(--secondary-text-color, #ccc);">Max Download (Mbps)</label>`;
@@ -1647,4 +1725,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.3.6 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.4.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

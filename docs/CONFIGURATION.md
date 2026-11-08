@@ -69,6 +69,7 @@ These are set in the card's visual editor (or directly in its YAML), not through
 | **Title** | Text | `PACE` | Header text shown top-left; clicking it opens the integration's settings page |
 | **Terminal Style** | Toggle | On | Off reverts the card to a native HA card's look (colors, font, rounded corners) |
 | **Show Gauges** | Toggle | On | Show/hide the download/upload radial gauges |
+| **Average Gauges** | Toggle | Off | Show the gauges' mean over History (hours) instead of the live current reading; the gauge label shows the averaging window, e.g. "Download (7D AVG)" |
 | **Show Charts** | Toggle | On | Show/hide the Throughput/Latency history charts |
 | **Show Plan & Usage** | Toggle | On | Show/hide the whole Plan Compliance + Data Usage section |
 | **Max Download/Upload (Mbps)** | Number | Auto | Overrides the gauges' scale; auto uses the ISP rated speed (+20%) if set, else 1000/500 |
