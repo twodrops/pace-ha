@@ -25,7 +25,7 @@ async def test_setup_creates_all_sensors(
     mock_native_client: AsyncMock,
     mock_store: AsyncMock,
 ) -> None:
-    """Test all 12 sensors are created through HA setup pipeline."""
+    """Test all 13 sensors are created through HA setup pipeline."""
     await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
     await hass.async_block_till_done()
 
@@ -42,6 +42,7 @@ async def test_setup_creates_all_sensors(
         f"{PREFIX}_backend",
         f"{PREFIX}_last_test_time",
         f"{PREFIX}_public_ip_address",
+        f"{PREFIX}_consecutive_test_failures",
     ]
     for entity_id in expected:
         state = hass.states.get(entity_id)
@@ -166,6 +167,36 @@ async def test_backend_sensor_state(
 
     state = hass.states.get(f"{PREFIX}_backend")
     assert state.state == "librespeed"
+
+
+async def test_consecutive_failures_sensor_state(
+    hass: HomeAssistant,
+    mock_config_entry_no_auto: MockConfigEntry,
+    mock_native_client: AsyncMock,
+    mock_store: AsyncMock,
+) -> None:
+    """Test the Consecutive Test Failures sensor tracks failures, exposes
+    the last error as an attribute, and stays available through an outage."""
+    await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
+    await hass.async_block_till_done()
+
+    state = hass.states.get(f"{PREFIX}_consecutive_test_failures")
+    assert state.state == "0"
+    assert state.attributes["last_error"] is None
+
+    mock_native_client.run_speed_test.side_effect = SpeedTestError("Rate limited")
+    coordinator = mock_config_entry_no_auto.runtime_data.coordinator
+    for _ in range(5):
+        await coordinator.async_refresh()
+        await hass.async_block_till_done()
+
+    # Stays available (unlike the main sensors) even past the threshold
+    # where those go unavailable - this is the one entity meant to stay
+    # visible during an outage.
+    state = hass.states.get(f"{PREFIX}_consecutive_test_failures")
+    assert state.state == "5"
+    assert "Rate limited" in state.attributes["last_error"]
+    assert hass.states.get(f"{PREFIX}_download_speed").state == "unavailable"
 
 
 async def test_public_ip_sensor_state(
@@ -293,13 +324,36 @@ async def test_sensor_states_update_after_speed_test(
     assert state.state == "New Server"
 
 
+async def test_sensors_stay_available_after_single_failed_update(
+    hass: HomeAssistant,
+    mock_config_entry_no_auto: MockConfigEntry,
+    mock_native_client: AsyncMock,
+    mock_store: AsyncMock,
+) -> None:
+    """Test a single failed update keeps sensors available with the last
+    known reading (e.g. a backend's own rate limiting shouldn't flip
+    sensors unavailable on every single attempt)."""
+    await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
+    await hass.async_block_till_done()
+
+    mock_native_client.run_speed_test.side_effect = SpeedTestError("Rate limited")
+
+    coordinator = mock_config_entry_no_auto.runtime_data.coordinator
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    state = hass.states.get(f"{PREFIX}_download_speed")
+    assert state.state == "250.5"
+    assert coordinator.consecutive_failures == 1
+
+
 async def test_sensors_unavailable_after_failed_update(
     hass: HomeAssistant,
     mock_config_entry_no_auto: MockConfigEntry,
     mock_native_client: AsyncMock,
     mock_store: AsyncMock,
 ) -> None:
-    """Test sensors become unavailable after a failed coordinator update."""
+    """Test sensors become unavailable once consecutive failures reach the warning threshold."""
     await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
     await hass.async_block_till_done()
 
@@ -307,14 +361,16 @@ async def test_sensors_unavailable_after_failed_update(
     state = hass.states.get(f"{PREFIX}_download_speed")
     assert state.state == "250.5"
 
-    # Make the next speed test fail
+    # Make every subsequent speed test fail
     mock_native_client.run_speed_test.side_effect = SpeedTestError("Connection lost")
 
     coordinator = mock_config_entry_no_auto.runtime_data.coordinator
-    await coordinator.async_refresh()
-    await hass.async_block_till_done()
+    for _ in range(5):
+        await coordinator.async_refresh()
+        await hass.async_block_till_done()
 
-    # Sensors should be unavailable (last_update_success = False)
+    # Sensors should be unavailable only once failures reach the threshold
+    assert coordinator.consecutive_failures == 5
     state = hass.states.get(f"{PREFIX}_download_speed")
     assert state.state == "unavailable"
 
@@ -325,15 +381,16 @@ async def test_sensors_recover_after_successful_update(
     mock_native_client: AsyncMock,
     mock_store: AsyncMock,
 ) -> None:
-    """Test sensors recover with new data after a failure then success."""
+    """Test sensors recover with new data after reaching unavailability then succeeding."""
     await hass.config_entries.async_setup(mock_config_entry_no_auto.entry_id)
     await hass.async_block_till_done()
 
-    # Fail first
+    # Fail enough times to cross the unavailability threshold
     mock_native_client.run_speed_test.side_effect = SpeedTestError("Temporary failure")
     coordinator = mock_config_entry_no_auto.runtime_data.coordinator
-    await coordinator.async_refresh()
-    await hass.async_block_till_done()
+    for _ in range(5):
+        await coordinator.async_refresh()
+        await hass.async_block_till_done()
 
     assert hass.states.get(f"{PREFIX}_download_speed").state == "unavailable"
 

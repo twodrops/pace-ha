@@ -178,6 +178,13 @@ SENSOR_TYPES: tuple[PaceSensorEntityDescription, ...] = (
         name="Public IP Address",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    PaceSensorEntityDescription(
+        key="consecutive_failures",
+        translation_key="consecutive_failures",
+        name="Consecutive Test Failures",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 )
 
 
@@ -222,6 +229,11 @@ class PaceSensor(PaceBaseEntity, SensorEntity):
         if self.entity_description.key == "public_ip":
             return self.coordinator.public_ip
 
+        # Not test data either - always reflects the live failure streak so
+        # it stays meaningful even once the main sensors go unavailable.
+        if self.entity_description.key == "consecutive_failures":
+            return self.coordinator.consecutive_failures
+
         if not self.coordinator.data:
             return None
 
@@ -245,6 +257,17 @@ class PaceSensor(PaceBaseEntity, SensorEntity):
         return None
 
     @property
+    def available(self) -> bool:
+        """Return if entity is available.
+
+        The failure-tracking sensor stays available even through an
+        outage, since that's exactly when it's most useful to check.
+        """
+        if self.entity_description.key == "consecutive_failures":
+            return True
+        return super().available
+
+    @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         # These are coordinator config, not test data, so expose them even
@@ -257,6 +280,10 @@ class PaceSensor(PaceBaseEntity, SensorEntity):
         if self.entity_description.key == "upload_compliance":
             return {
                 "isp_rated_speed": self.coordinator.isp_upload_speed,
+            }
+        if self.entity_description.key == "consecutive_failures":
+            return {
+                "last_error": self.coordinator.last_test_error,
             }
 
         if not self.coordinator.data:

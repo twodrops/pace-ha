@@ -293,33 +293,40 @@ async def test_all_retries_exhausted_timeout(hass: HomeAssistant, mock_store) ->
 
 
 async def test_no_retry_on_speed_test_error(hass: HomeAssistant, mock_store) -> None:
-    """Test SpeedTestError doesn't retry."""
+    """Test SpeedTestError doesn't retry, but still counts as a failure."""
     client = AsyncMock()
     client.run_speed_test = AsyncMock(side_effect=SpeedTestError("test error"))
     coordinator = _make_coordinator(hass, client=client)
-    with pytest.raises(UpdateFailed, match="Speed test error"):
+    with pytest.raises(UpdateFailed, match="Speed test failed"):
         await coordinator._async_update_data()
     assert client.run_speed_test.call_count == 1
+    assert coordinator.consecutive_failures == 1
 
 
 async def test_no_retry_on_network_error(hass: HomeAssistant, mock_store) -> None:
-    """Test NetworkError doesn't retry."""
+    """Test NetworkError doesn't retry, but still counts as a failure."""
     client = AsyncMock()
     client.run_speed_test = AsyncMock(side_effect=NetworkError("net error"))
     coordinator = _make_coordinator(hass, client=client)
     with pytest.raises(UpdateFailed):
         await coordinator._async_update_data()
     assert client.run_speed_test.call_count == 1
+    assert coordinator.consecutive_failures == 1
 
 
 async def test_no_retry_on_cli_error(hass: HomeAssistant, mock_store) -> None:
-    """Test CLIError doesn't retry."""
+    """Test CLIError doesn't retry, but still counts as a failure (e.g. a
+    backend's own rate limiting must eventually surface a repair issue and
+    trip the circuit breaker, which requires the counter to actually move).
+    """
     client = AsyncMock()
     client.run_speed_test = AsyncMock(side_effect=CLIError("cli fail"))
     coordinator = _make_coordinator(hass, client=client)
     with pytest.raises(UpdateFailed):
         await coordinator._async_update_data()
     assert client.run_speed_test.call_count == 1
+    assert coordinator.consecutive_failures == 1
+    assert coordinator.last_test_error == "cli fail"
 
 
 # ---- Circuit breaker ----
@@ -544,13 +551,14 @@ async def test_consecutive_failures_setter(hass: HomeAssistant, mock_store) -> N
 async def test_data_processing_error_raises_update_failed(
     hass: HomeAssistant, mock_store
 ) -> None:
-    """Test ValueError/TypeError during speed test raises UpdateFailed."""
+    """Test ValueError/TypeError during speed test raises UpdateFailed and still counts as a failure."""
     client = AsyncMock()
     # Return a result that will cause a parsing error (non-dict)
     client.run_speed_test = AsyncMock(return_value="not a dict")
     coordinator = _make_coordinator(hass, client=client)
-    with pytest.raises(UpdateFailed, match="Data processing error"):
+    with pytest.raises(UpdateFailed, match="Speed test failed"):
         await coordinator._async_update_data()
+    assert coordinator.consecutive_failures == 1
 
 
 # ---- Invalid timestamp in stored data ----

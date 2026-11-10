@@ -160,6 +160,7 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         # Failure tracking for repair flows
         self._consecutive_failures: int = 0
+        self._last_test_error: str | None = None
         self._last_custom_server_error: float = 0.0
 
         # If start_time is set, scheduling is handled manually via
@@ -296,6 +297,11 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def consecutive_failures(self, value: int) -> None:
         """Set the consecutive failure count."""
         self._consecutive_failures = value
+
+    @property
+    def last_test_error(self) -> str | None:
+        """Return the most recent test failure message, or None if the last test succeeded."""
+        return self._last_test_error
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from the configured CLI backend with retry logic and circuit breaker.
@@ -450,6 +456,7 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
                 # Reset failure counter on success and clear any repair issues
                 self._consecutive_failures = 0
+                self._last_test_error = None
                 from homeassistant.helpers import issue_registry as ir
 
                 ir.async_delete_issue(
@@ -496,16 +503,26 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     continue
 
             except (SpeedTestError, NetworkError, CLIError) as err:
-                # Don't retry on known errors
+                # Don't retry on known errors, but still count this as a
+                # failure (same as timeout/network errors below) instead of
+                # raising immediately - otherwise a backend's own rate
+                # limiting (e.g. Ookla) never increments consecutive_failures
+                # at all, so entities would never recover via the threshold
+                # below, and the repeated-failures repair issue never fires.
+                last_error = err
                 _LOGGER.error("Speed test error: %s", err)
-                raise UpdateFailed(f"Speed test error: {err}") from err
+                break
             except (ValueError, TypeError, KeyError, AttributeError) as err:
-                # Don't retry on data/parsing errors
+                # Don't retry on data/parsing errors, same reasoning as above.
+                last_error = err
                 _LOGGER.exception("Data processing error during speed test")
-                raise UpdateFailed(f"Data processing error: {err}") from err
+                break
 
         # If we get here, all retries failed - track failures for repair issues
         self._consecutive_failures += 1
+        self._last_test_error = (
+            str(last_error) if last_error else "Speed test failed after multiple attempts"
+        )
 
         # Check for custom server issues (only if using custom server)
         if custom_server and isinstance(
@@ -578,6 +595,8 @@ class PaceDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(
                 f"Network error after multiple attempts: {last_error}"
             ) from last_error
+        if last_error is not None:
+            raise UpdateFailed(f"Speed test failed: {last_error}") from last_error
         raise UpdateFailed("Speed test failed after multiple attempts")
 
     def _parse_result(self, result: dict) -> dict[str, Any]:

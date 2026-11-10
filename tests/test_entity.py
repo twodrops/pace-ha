@@ -13,12 +13,13 @@ from custom_components.pace.entity import PaceBaseEntity
 
 def _make_entity(
     data=None, last_update_success=True, entry_id="test_id", title="Test",
-    backend_type="librespeed",
+    backend_type="librespeed", consecutive_failures=0,
 ):
     """Create a base entity with a mocked coordinator."""
     coordinator = MagicMock()
     coordinator.data = data
     coordinator.last_update_success = last_update_success
+    coordinator.consecutive_failures = consecutive_failures
     coordinator.config_entry.entry_id = entry_id
     coordinator.entry_title = title
     coordinator.backend_type = backend_type
@@ -58,18 +59,27 @@ def test_device_info_ookla_backend() -> None:
 
 
 def test_available_with_data() -> None:
-    """Test entity is available when coordinator has data."""
-    entity = _make_entity(data={"download": 100}, last_update_success=True)
+    """Test entity is available when coordinator has data and no failures."""
+    entity = _make_entity(data={"download": 100})
     assert entity.available is True
 
 
 def test_unavailable_no_data() -> None:
     """Test entity is unavailable when no data."""
-    entity = _make_entity(data=None, last_update_success=True)
+    entity = _make_entity(data=None)
     assert entity.available is False
 
 
-def test_unavailable_update_failed() -> None:
-    """Test entity is unavailable when update failed."""
-    entity = _make_entity(data={"download": 100}, last_update_success=False)
+def test_available_below_failure_threshold() -> None:
+    """Test entity stays available through a handful of failures, keeping
+    the last known-good reading visible (e.g. a backend's own rate
+    limiting shouldn't flip entities unavailable on every single attempt).
+    """
+    entity = _make_entity(data={"download": 100}, consecutive_failures=4)
+    assert entity.available is True
+
+
+def test_unavailable_at_failure_threshold() -> None:
+    """Test entity goes unavailable once failures reach the warning threshold."""
+    entity = _make_entity(data={"download": 100}, consecutive_failures=5)
     assert entity.available is False

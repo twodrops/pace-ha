@@ -6,7 +6,7 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import BACKEND_DEVICE_INFO, DOMAIN
+from .const import BACKEND_DEVICE_INFO, CIRCUIT_BREAKER_WARNING_THRESHOLD, DOMAIN
 from .coordinator import PaceDataUpdateCoordinator
 
 
@@ -66,8 +66,14 @@ class PaceBaseEntity(CoordinatorEntity[PaceDataUpdateCoordinator]):
     def available(self) -> bool:
         """Return if entity is available.
 
-        Entity is available if coordinator has data.
+        Available once there's ever been a successful test, tolerating up
+        to CIRCUIT_BREAKER_WARNING_THRESHOLD - 1 consecutive failures
+        before going unavailable - a backend's own rate limiting (e.g.
+        Ookla) or a single transient hiccup no longer flips entities
+        unavailable on every failed attempt; the last known reading stays
+        visible until failures actually pile up, at the same point a
+        repair issue would already warn about it.
         """
-        return (
-            self.coordinator.last_update_success and self.coordinator.data is not None
-        )
+        if self.coordinator.data is None:
+            return False
+        return self.coordinator.consecutive_failures < CIRCUIT_BREAKER_WARNING_THRESHOLD

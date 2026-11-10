@@ -66,6 +66,15 @@
 
 **Solution**: Go to Settings → Devices & Services → PACE → Configure, and set your ISP's advertised Mbit/s values.
 
+### Sensors go unavailable with the Ookla CLI backend
+**Symptom**: Download/upload/ping sensors flip to `unavailable`, more often than with the LibreSpeed backend.
+
+**Cause**: Ookla's own servers rate-limit the `speedtest` CLI if tests run too frequently. A single rate-limited (or otherwise failed) test attempt no longer makes sensors unavailable - the last known reading stays visible for up to 4 consecutive failures. Sensors only go unavailable once failures reach 5 in a row (the same point a "Repeated speed test failures" repair issue appears), and recover automatically on the next successful test.
+
+**Diagnostic**: Check `sensor.pace_consecutive_test_failures` - its `last_error` attribute shows the most recent failure's message, and it stays available even once the main sensors don't, so it's the one entity to check during an outage.
+
+**Solution**: If this happens often, either increase the scan interval (Settings → Devices & Services → PACE → Configure) so tests run less frequently, or switch to the LibreSpeed backend, which aren't subject to rate limiting.
+
 3. **Review automation conflicts**:
    - Ensure no other automations are interfering
    - Check if Home Assistant is in maintenance mode
