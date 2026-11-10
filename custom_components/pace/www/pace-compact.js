@@ -2,7 +2,7 @@
  * Pace Card - Compact Version (Bubble Style)
  * Minimalist pill-shaped card inspired by Bubble Card design
  *
- * Version: 1.6.0
+ * Version: 1.6.1
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -11,7 +11,7 @@
  * - Mobile-first, minimalist design
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.0';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.1';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -231,7 +231,7 @@ class PaceCompact extends HTMLElement {
           box-shadow: var(--ha-card-box-shadow, 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2));
         }
         :host([ha]) .action-button {
-          border-radius: 8px;
+          border-radius: var(--ha-card-border-radius, 8px);
         }
 
         .card {
@@ -267,7 +267,7 @@ class PaceCompact extends HTMLElement {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%);
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pace-accent-color, var(--ls-accent, #0ea5e9)) 5%, transparent) 0%, color-mix(in srgb, var(--ls-upload, #a78bfa) 5%, transparent) 100%);
           opacity: 0;
           transition: opacity 0.3s ease;
           pointer-events: none;
@@ -604,4 +604,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE COMPACT (BUBBLE) %c v1.6.0 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE COMPACT (BUBBLE) %c v1.6.1 ", "background: #0ea5e9; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

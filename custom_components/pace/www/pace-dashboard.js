@@ -2,7 +2,7 @@
  * Pace Card - Dashboard Version
  * Full-featured dashboard card with configurable gauges and charts
  *
- * Version: 1.6.0
+ * Version: 1.6.1
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.0';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.1';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -839,11 +839,11 @@ class PaceDashboard extends HTMLElement {
           :host([ha]) .metric,
           :host([ha]) .chart-card,
           :host([ha]) .run-btn {
-            border-radius: 8px;
+            border-radius: var(--ha-card-border-radius, 8px);
           }
           :host([ha]) .bar-track,
           :host([ha]) .bar-fill {
-            border-radius: 2px;
+            border-radius: 999px;
           }
           :host([ha]) .metric .label,
           :host([ha]) .server-name,
@@ -852,22 +852,27 @@ class PaceDashboard extends HTMLElement {
           :host([ha]) .chart-legend,
           :host([ha]) .gauge-label,
           :host([ha]) .section-title,
-          :host([ha]) .chart-title {
+          :host([ha]) .chart-title,
+          :host([ha]) .net-state,
+          :host([ha]) .run-btn {
             text-transform: none;
             letter-spacing: 0;
           }
+          :host([ha]) .chart-legend i {
+            border-radius: 50%;
+          }
           :host([ha]) .section-title {
-            border-top: none;
-            font-weight: 500;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-text-color, #f8fafc);
           }
           :host([ha]) .footer {
             border-top: none;
           }
           :host([ha]) .header {
             background: transparent;
-            border-bottom: none;
-            margin: 0 0 10px;
-            padding: 0;
+            margin: 0 calc(-1 * var(--card-pad)) 10px calc(-1 * var(--card-pad));
+            padding: 0 var(--card-pad) 10px;
           }
 
           .card {
@@ -969,6 +974,12 @@ class PaceDashboard extends HTMLElement {
           }
           .metric:hover { background: var(--ls-head, #1d2330); }
           .metric:active { background: var(--ls-border-hot, #3a4554); }
+          /* In HA style, --ls-head aliases the card's own background, so
+             the rule above is a no-op there (hover would be invisible) -
+             use a neutral state-layer tint instead, same approach as
+             .net-state already uses, which works in light or dark alike. */
+          :host([ha]) .metric:hover { background: rgba(127, 127, 127, 0.12); }
+          :host([ha]) .metric:active { background: rgba(127, 127, 127, 0.22); }
           /* Corner-bracket frame: literal Unicode box-drawing glyphs sitting
              right on the border corners (not CSS-drawn rectangles). Only on
              the 4 stat cards that actually carry a sparkline, colored to
@@ -1117,7 +1128,7 @@ class PaceDashboard extends HTMLElement {
             flex-shrink: 0;
           }
           .chart-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-          .chart-title { font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: var(--primary-text-color, #f8fafc); }
+          .chart-title { font-size: 11px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; color: var(--primary-text-color, #f8fafc); }
           .chart-title::before { content: '┃ '; color: var(--pace-accent-color, var(--ls-accent, #2b6fd9)); }
           .chart-legend { display: flex; gap: 14px; font-size: 10px; color: var(--secondary-text-color, #94a3b8); }
           .chart-legend span { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
@@ -1149,7 +1160,7 @@ class PaceDashboard extends HTMLElement {
             position: absolute;
             top: 4px;
             min-width: 90px;
-            background: var(--card-background-color, #10141d);
+            background: var(--ls-card, #10141d);
             border: 1px solid var(--ls-border, #2a3142);
             border-radius: 0;
             transition: left 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1376,7 +1387,7 @@ class PaceDashboard extends HTMLElement {
         <div class="section-title">Test.History</div>
         <div class="chart-card chart-card-traffic">
           <div class="chart-head">
-            <div class="chart-title">THROUGHPUT</div>
+            <div class="chart-title">Throughput</div>
             <div class="chart-legend">
               <span class="legend-download"><i style="background:${this._chartColor('download')}"></i>${labels.download} (avg) <b>0</b> Mbps</span>
               <span class="legend-upload"><i style="background:${this._chartColor('upload')}"></i>${labels.upload} (avg) <b>0</b> Mbps</span>
@@ -1396,7 +1407,7 @@ class PaceDashboard extends HTMLElement {
 
         <div class="chart-card chart-card-latency">
           <div class="chart-head">
-            <div class="chart-title">LATENCY</div>
+            <div class="chart-title">Latency</div>
             <div class="chart-legend">
               <span class="legend-ping"><i style="background:${this._chartColor('ping')}"></i>${labels.ping} (avg) <b>0</b> ms</span>
               <span class="legend-jitter"><i style="background:${this._chartColor('jitter')}"></i>${labels.jitter} (avg) <b>0</b> ms</span>
@@ -1727,4 +1738,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE DASHBOARD %c v1.6.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE DASHBOARD %c v1.6.1 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");

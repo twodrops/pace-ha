@@ -2,7 +2,7 @@
  * Pace Card - Minimal Version
  * A clean, simple speedtest card with large typography
  *
- * Version: 1.6.0
+ * Version: 1.6.1
  *
  * Layout Compatibility:
  * - Masonry: Returns card size for proper column distribution
@@ -10,7 +10,7 @@
  * - Both layouts fully supported with proper height handling
  */
 
-import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.0';
+import { anyStateChanged, applyHaStyleAttribute, applyTerminalPalette, beginScrollAnchor, getTerminalColor, navigateToPaceIntegration, renderHeartbeatBars, resolvePaceEntity, TERMINAL_FONT_MONO } from './pace-card-utils.js?v=1.6.1';
 
 // Maps each config entity key to the fixed English entity_id suffix it should
 // end with, used to find the right entity when the configured/stub id
@@ -261,7 +261,7 @@ class PaceMinimal extends HTMLElement {
         :host([ha]) .ping-row,
         :host([ha]) .link-row,
         :host([ha]) .test-btn {
-          border-radius: 8px;
+          border-radius: var(--ha-card-border-radius, 8px);
         }
 
         .card {
@@ -389,6 +389,17 @@ class PaceMinimal extends HTMLElement {
         .ping-row:active,
         .link-row:active {
           background: var(--ls-border-hot, #3a4554);
+        }
+        /* In HA style, --ls-head aliases the card's own background, so the
+           rule above is a no-op there - use a neutral state-layer tint
+           instead, same approach .net-state uses in the Dashboard card. */
+        :host([ha]) .ping-row:hover,
+        :host([ha]) .link-row:hover {
+          background: rgba(127, 127, 127, 0.12);
+        }
+        :host([ha]) .ping-row:active,
+        :host([ha]) .link-row:active {
+          background: rgba(127, 127, 127, 0.22);
         }
         .ping-value {
           color: var(--ls-ping, #c97b1a);
@@ -649,4 +660,4 @@ window.customCards.push({
   preview: true
 });
 
-console.info("%c PACE MINIMAL %c v1.6.0 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
+console.info("%c PACE MINIMAL %c v1.6.1 ", "background: #00d2ff; color: #fff; font-weight: bold;", "background: #1e293b; color: #fff;");
